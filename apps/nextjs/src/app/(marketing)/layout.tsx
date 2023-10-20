@@ -7,7 +7,7 @@ import { Button } from '@haxiom/ui/button';
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
-      <NavigationBar />
+      {/* <NavigationBar /> */}
       <main className={cn(MAX_WIDTH_CLASS, MAIN_CONTENT_CLASS)}>{children}</main>
     </>
   );
