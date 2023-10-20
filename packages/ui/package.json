@@ -30,7 +30,7 @@
     "cmdk": "^0.2.0",
     "lucide-react": "^0.258.0",
     "tailwind-merge": "^1.13.2",
-    "zod": "^3.21.4"
+    "zod": "^3.22.3"
   },
   "peerDependencies": {
     "@tanstack/react-table": "^8.9.3",
