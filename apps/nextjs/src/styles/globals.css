@@ -1,0 +1,463 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root,
+  .light {
+    --gray-1: 0deg 0% 99%;
+    --gray-2: 0deg 0% 97.3%;
+    --gray-3: 0deg 0% 95.1%;
+    --gray-4: 0deg 0% 93%;
+    --gray-5: 0deg 0% 90.9%;
+    --gray-6: 0deg 0% 88.7%;
+    --gray-7: 0deg 0% 85.8%;
+    --gray-8: 0deg 0% 78%;
+    --gray-9: 0deg 0% 56.1%;
+    --gray-10: 0deg 0% 52.3%;
+    --gray-11: 0deg 0% 43.5%;
+    --gray-12: 0deg 0% 9%;
+
+    --grayA1: 0deg 0% 0% / 0.012;
+    --grayA2: 0deg 0% 0% / 0.027;
+    --grayA3: 0deg 0% 0% / 0.047;
+    --grayA4: 0deg 0% 0% / 0.071;
+    --grayA5: 0deg 0% 0% / 0.09;
+    --grayA6: 0deg 0% 0% / 0.114;
+    --grayA7: 0deg 0% 0% / 0.141;
+    --grayA8: 0deg 0% 0% / 0.22;
+    --grayA9: 0deg 0% 0% / 0.439;
+    --grayA10: 0deg 0% 0% / 0.478;
+    --grayA11: 0deg 0% 0% / 0.565;
+    --grayA12: 0deg 0% 0% / 0.91;
+
+    --blue-1: 206deg 100% 99.2%;
+    --blue-2: 210deg 100% 98%;
+    --blue-3: 209deg 100% 96.5%;
+    --blue-4: 210deg 98.8% 94%;
+    --blue-5: 209deg 95% 90.1%;
+    --blue-6: 209deg 81.2% 84.5%;
+    --blue-7: 208deg 77.5% 76.9%;
+    --blue-8: 206deg 81.9% 65.3%;
+    --blue-9: 206deg 100% 50%;
+    --blue-10: 208deg 100% 47.3%;
+    --blue-11: 211deg 100% 43.2%;
+    --blue-12: 211deg 100% 15%;
+
+    --blueA1: 210deg 100% 51% / 0.016;
+    --blueA2: 210deg 100% 51% / 0.04;
+    --blueA3: 210deg 100% 50.3% / 0.071;
+    --blueA4: 210deg 100% 50.1% / 0.118;
+    --blueA5: 208deg 99.1% 47.1% / 0.189;
+    --blueA6: 209deg 99.5% 45.3% / 0.283;
+    --blueA7: 208deg 99.9% 43.8% / 0.412;
+    --blueA8: 206deg 99.8% 45.1% / 0.632;
+    --blueA9: 206deg 100% 50% / 0.98;
+    --blueA10: 208deg 100% 47.2% / 0.98;
+    --blueA11: 212deg 100% 43% / 0.98;
+    --blueA12: 213deg 100% 14.4% / 0.98;
+
+    --plum-1: 292deg 90% 99.4%;
+    --plum-2: 300deg 100% 98.6%;
+    --plum-3: 299deg 71.2% 96.4%;
+    --plum-4: 299deg 62% 93.8%;
+    --plum-5: 298deg 56.1% 90.5%;
+    --plum-6: 296deg 51.3% 85.8%;
+    --plum-7: 295deg 48.2% 78.9%;
+    --plum-8: 292deg 47.7% 70.8%;
+    --plum-9: 292deg 45% 51%;
+    --plum-10: 292deg 50.2% 46.9%;
+    --plum-11: 292deg 60% 42.5%;
+    --plum-12: 291deg 66% 14%;
+
+    --plumA1: 280deg 100% 51% / 0.012;
+    --plumA2: 300deg 100% 51% / 0.028;
+    --plumA3: 300deg 99% 40.9% / 0.063;
+    --plumA4: 300deg 99.9% 38.5% / 0.102;
+    --plumA5: 298deg 98.2% 35.9% / 0.15;
+    --plumA6: 297deg 99.6% 33.7% / 0.216;
+    --plumA7: 295deg 99.7% 32.6% / 0.314;
+    --plumA8: 292deg 99.6% 32.4% / 0.432;
+    --plumA9: 292deg 99.9% 31% / 0.71;
+    --plumA10: 292deg 99.9% 30.8% / 0.765;
+    --plumA11: 292deg 99.8% 30.7% / 0.832;
+    --plumA12: 291deg 99.9% 9.7% / 0.953;
+
+    --red-1: 359deg 100% 99.4%;
+    --red-2: 359deg 100% 98.6%;
+    --red-3: 360deg 100% 96.8%;
+    --red-4: 360deg 97.9% 94.8%;
+    --red-5: 360deg 90.2% 91.9%;
+    --red-6: 360deg 81.7% 87.8%;
+    --red-7: 359deg 74.2% 81.7%;
+    --red-8: 359deg 69.5% 74.3%;
+    --red-9: 358deg 75% 59%;
+    --red-10: 358deg 69.4% 55.2%;
+    --red-11: 358deg 65% 48.7%;
+    --red-12: 354deg 50% 14.6%;
+
+    --redA1: 0deg 100% 51% / 0.012;
+    --redA2: 0deg 100% 51% / 0.032;
+    --redA3: 0deg 100% 50.2% / 0.063;
+    --redA4: 0deg 100% 50% / 0.102;
+    --redA5: 0deg 99.9% 47.5% / 0.153;
+    --redA6: 0deg 99.5% 44.9% / 0.224;
+    --redA7: 359deg 99.7% 42.7% / 0.318;
+    --redA8: 359deg 99.6% 41.1% / 0.436;
+    --redA9: 358deg 99.9% 42.9% / 0.718;
+    --redA10: 358deg 99.9% 41% / 0.761;
+    --redA11: 358deg 99.8% 38.3% / 0.832;
+    --redA12: 355deg 99.3% 7.9% / 0.926;
+
+    --grass-1: 116deg 50% 98.9%;
+    --grass-2: 120deg 60% 97.1%;
+    --grass-3: 120deg 53.6% 94.8%;
+    --grass-4: 121deg 47.5% 91.4%;
+    --grass-5: 122deg 42.6% 86.5%;
+    --grass-6: 124deg 39% 79.7%;
+    --grass-7: 126deg 37.1% 70.2%;
+    --grass-8: 131deg 38.1% 56.3%;
+    --grass-9: 131deg 41% 46.5%;
+    --grass-10: 132deg 43.1% 42.2%;
+    --grass-11: 133deg 50% 32.5%;
+    --grass-12: 130deg 30% 14.9%;
+
+    --grassA1: 120deg 94.9% 38.7% / 0.016;
+    --grassA2: 120deg 94.9% 38.7% / 0.048;
+    --grassA3: 120deg 98% 35.5% / 0.079;
+    --grassA4: 120deg 98.7% 31.5% / 0.126;
+    --grassA5: 122deg 98.5% 29.9% / 0.193;
+    --grassA6: 125deg 99.2% 27.9% / 0.283;
+    --grassA7: 125deg 99.9% 27% / 0.408;
+    --grassA8: 131deg 100% 27.6% / 0.604;
+    --grassA9: 131deg 99.7% 26.3% / 0.726;
+    --grassA10: 132deg 99.9% 24% / 0.761;
+    --grassA11: 133deg 99.5% 19.5% / 0.84;
+    --grassA12: 128deg 98% 4.9% / 0.895;
+
+    --amber-1: 39deg 70% 99%;
+    --amber-2: 40deg 100% 96.5%;
+    --amber-3: 44deg 100% 91.7%;
+    --amber-4: 43deg 100% 86.8%;
+    --amber-5: 42deg 100% 81.8%;
+    --amber-6: 38deg 99.7% 76.3%;
+    --amber-7: 36deg 86.1% 67.1%;
+    --amber-8: 35deg 85.2% 55.1%;
+    --amber-9: 39deg 100% 57%;
+    --amber-10: 35deg 100% 55.5%;
+    --amber-11: 30deg 100% 34%;
+    --amber-12: 20deg 80% 17%;
+
+    --amberA1: 40deg 94.9% 38.7% / 0.016;
+    --amberA2: 40deg 100% 50.3% / 0.071;
+    --amberA3: 44deg 100% 50.1% / 0.165;
+    --amberA4: 43deg 100% 50% / 0.263;
+    --amberA5: 42deg 100% 50% / 0.365;
+    --amberA6: 38deg 100% 50.1% / 0.475;
+    --amberA7: 36deg 99.9% 46.2% / 0.612;
+    --amberA8: 35deg 99.8% 46% / 0.832;
+    --amberA9: 39deg 100% 50% / 0.859;
+    --amberA10: 35deg 100% 50% / 0.891;
+    --amberA11: 29deg 100% 33.6% / 0.98;
+    --amberA12: 20deg 99.8% 14.1% / 0.965;
+  }
+
+  .dark {
+    --gray-1: 0deg 0% 8.5%;
+    --gray-2: 0deg 0% 11%;
+    --gray-3: 0deg 0% 13.6%;
+    --gray-4: 0deg 0% 15.8%;
+    --gray-5: 0deg 0% 17.9%;
+    --gray-6: 0deg 0% 20.5%;
+    --gray-7: 0deg 0% 24.3%;
+    --gray-8: 0deg 0% 31.2%;
+    --gray-9: 0deg 0% 43.9%;
+    --gray-10: 0deg 0% 49.4%;
+    --gray-11: 0deg 0% 62.8%;
+    --gray-12: 0deg 0% 93%;
+
+    --grayA1: 0deg 0% 0% / 0;
+    --grayA2: 0deg 0% 0% / 0.026;
+    --grayA3: 0deg 0% 0% / 0.056;
+    --grayA4: 0deg 0% 0% / 0.077;
+    --grayA5: 0deg 0% 0% / 0.103;
+    --grayA6: 0deg 0% 0% / 0.129;
+    --grayA7: 0deg 0% 0% / 0.172;
+    --grayA8: 0deg 0% 0% / 0.249;
+    --grayA9: 0deg 0% 0% / 0.386;
+    --grayA10: 0deg 0% 0% / 0.446;
+    --grayA11: 0deg 0% 0% / 0.592;
+    --grayA12: 0deg 0% 0% / 0.923;
+
+    --blue-1: 212deg 35% 9.2%;
+    --blue-2: 216deg 50% 11.8%;
+    --blue-3: 214deg 59.4% 15.3%;
+    --blue-4: 214deg 65.8% 17.9%;
+    --blue-5: 213deg 71.2% 20.2%;
+    --blue-6: 212deg 77.4% 23.1%;
+    --blue-7: 211deg 85.1% 27.4%;
+    --blue-8: 211deg 89.7% 34.1%;
+    --blue-9: 206deg 100% 50%;
+    --blue-10: 209deg 100% 60.6%;
+    --blue-11: 210deg 100% 66.1%;
+    --blue-12: 206deg 98% 95.8%;
+
+    --blueA1: 0deg 0% 0% / 0;
+    --blueA2: 221deg 97.8% 52.4% / 0.059;
+    --blueA3: 215deg 99.3% 54.2% / 0.135;
+    --blueA4: 215deg 99.3% 53.8% / 0.198;
+    --blueA5: 213deg 99.4% 52.8% / 0.252;
+    --blueA6: 212deg 99.9% 51.7% / 0.323;
+    --blueA7: 211deg 100% 50.7% / 0.435;
+    --blueA8: 211deg 99.8% 50.9% / 0.597;
+    --blueA9: 205deg 100% 50% / 0.98;
+    --blueA10: 208deg 100% 60.7% / 0.98;
+    --blueA11: 209deg 100% 66.3% / 0.98;
+    --blueA12: 196deg 100% 96.8% / 0.98;
+
+    --plum-1: 301deg 20% 9.4%;
+    --plum-2: 300deg 29.8% 11.2%;
+    --plum-3: 298deg 34.4% 15.3%;
+    --plum-4: 297deg 36.8% 18.3%;
+    --plum-5: 296deg 38.5% 21.1%;
+    --plum-6: 295deg 40.4% 24.7%;
+    --plum-7: 294deg 42.7% 30.6%;
+    --plum-8: 292deg 45.1% 40%;
+    --plum-9: 292deg 45% 51%;
+    --plum-10: 295deg 50% 55.4%;
+    --plum-11: 300deg 60% 62%;
+    --plum-12: 296deg 74% 95.7%;
+
+    --plumA1: 0deg 0% 0% / 0;
+    --plumA2: 300deg 96.4% 58.4% / 0.036;
+    --plumA3: 300deg 99.4% 67.1% / 0.102;
+    --plumA4: 295deg 99.8% 66.3% / 0.155;
+    --plumA5: 295deg 99.4% 67.1% / 0.204;
+    --plumA6: 294deg 99% 67.8% / 0.262;
+    --plumA7: 294deg 99.9% 67.7% / 0.363;
+    --plumA8: 292deg 99.8% 67.5% / 0.527;
+    --plumA9: 292deg 99.9% 69.2% / 0.695;
+    --plumA10: 295deg 99.9% 70.8% / 0.748;
+    --plumA11: 300deg 99.8% 72.9% / 0.828;
+    --plumA12: 300deg 100% 97.1% / 0.98;
+
+    --red-1: 353deg 23% 9.8%;
+    --red-2: 357deg 34.4% 12%;
+    --red-3: 356deg 43.4% 16.4%;
+    --red-4: 356deg 47.6% 19.2%;
+    --red-5: 356deg 51.1% 21.9%;
+    --red-6: 356deg 55.2% 25.9%;
+    --red-7: 357deg 60.2% 31.8%;
+    --red-8: 358deg 65% 40.4%;
+    --red-9: 358deg 75% 59%;
+    --red-10: 358deg 85.3% 64%;
+    --red-11: 358deg 100% 69.5%;
+    --red-12: 351deg 89% 96%;
+
+    --redA1: 0deg 0% 0% / 0;
+    --redA2: 5deg 98.5% 53.8% / 0.045;
+    --redA3: 359deg 99.1% 61.1% / 0.13;
+    --redA4: 358deg 98.8% 61% / 0.184;
+    --redA5: 357deg 99.6% 60.3% / 0.237;
+    --redA6: 358deg 99.6% 60.3% / 0.322;
+    --redA7: 357deg 100% 59.5% / 0.442;
+    --redA8: 358deg 99.8% 59.1% / 0.621;
+    --redA9: 358deg 100% 65.5% / 0.884;
+    --redA10: 358deg 100% 67.5% / 0.942;
+    --redA11: 358deg 100% 69.7% / 0.98;
+    --redA12: 352deg 100% 97.1% / 0.98;
+
+    --grass-1: 146deg 30% 7.4%;
+    --grass-2: 136deg 33.3% 8.8%;
+    --grass-3: 137deg 36% 11.4%;
+    --grass-4: 137deg 37.6% 13.7%;
+    --grass-5: 136deg 38.7% 16%;
+    --grass-6: 135deg 39.6% 19.1%;
+    --grass-7: 134deg 40.3% 23.8%;
+    --grass-8: 131deg 40.1% 30.8%;
+    --grass-9: 131deg 41% 46.5%;
+    --grass-10: 131deg 39% 52.1%;
+    --grass-11: 131deg 43% 57.2%;
+    --grass-12: 137deg 72% 94%;
+
+    --grassA1: 0deg 0% 0% / 0;
+    --grassA2: 107deg 97.2% 61.9% / 0.022;
+    --grassA3: 128deg 96.5% 69.8% / 0.066;
+    --grassA4: 130deg 100% 70.2% / 0.1;
+    --grassA5: 130deg 98.2% 69.1% / 0.14;
+    --grassA6: 132deg 99.9% 69.3% / 0.187;
+    --grassA7: 132deg 99.9% 69.8% / 0.261;
+    --grassA8: 130deg 99.6% 70.5% / 0.37;
+    --grassA9: 130deg 99.7% 70.6% / 0.618;
+    --grassA10: 131deg 100% 73.5% / 0.674;
+    --grassA11: 130deg 99.7% 75.6% / 0.731;
+    --grassA12: 137deg 100% 95.8% / 0.98;
+
+    --amber-1: 36deg 100% 6.1%;
+    --amber-2: 35deg 100% 7.6%;
+    --amber-3: 32deg 100% 10.2%;
+    --amber-4: 32deg 100% 12.4%;
+    --amber-5: 33deg 100% 14.6%;
+    --amber-6: 35deg 100% 17.1%;
+    --amber-7: 35deg 91% 21.6%;
+    --amber-8: 36deg 100% 25.5%;
+    --amber-9: 39deg 100% 57%;
+    --amber-10: 43deg 100% 64%;
+    --amber-11: 39deg 90% 49.8%;
+    --amber-12: 39deg 97% 93.2%;
+
+    --amberA1: 0deg 0% 0% / 0;
+    --amberA2: 31deg 100% 49.7% / 0.036;
+    --amberA3: 27deg 100% 49.9% / 0.094;
+    --amberA4: 29deg 100% 50% / 0.143;
+    --amberA5: 31deg 100% 50% / 0.192;
+    --amberA6: 35deg 100% 50% / 0.25;
+    --amberA7: 34deg 99.6% 52.9% / 0.331;
+    --amberA8: 36deg 100% 50% / 0.442;
+    --amberA9: 40deg 100% 57.2% / 0.98;
+    --amberA10: 44deg 100% 64.2% / 0.98;
+    --amberA11: 39deg 99.9% 52.7% / 0.938;
+    --amberA12: 45deg 100% 94.2% / 0.98;
+  }
+
+  :root {
+    --background: var(--gray-1);
+    --background-subtle: var(--gray-2);
+    --background-element: var(--gray-3);
+    --background-element-hover: var(--gray-4);
+    --background-element-active: var(--gray-5);
+    --background-element-selected: var(--gray-5);
+    --border-subtle: var(--gray-6);
+    --separator-subtle: var(--gray-6);
+    --element-border: var(--gray-7);
+    --element-border-hover: var(--gray-8);
+    --solid: var(--gray-9);
+    --solid-hover: var(--gray-10);
+    --foreground-subtle: var(--gray-11);
+    --focus-ring: var(--gray-11);
+    --foreground: var(--gray-12);
+
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  body {
+    @apply bg text;
+  }
+
+  ::selection {
+    @apply bg-gray-12 text-gray-1;
+  }
+
+  img,
+  picture,
+  video,
+  canvas,
+  svg {
+    display: block;
+    max-width: 100%;
+  }
+
+  * {
+    @apply focus-visible:z-10 focus-visible:relative focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-11 focus-visible:ring-offset-4 focus-visible:ring-offset-gray-1;
+  }
+
+  input,
+  button,
+  textarea,
+  select {
+    font: inherit;
+  }
+
+  ,
+  p,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    overflow-wrap: break-word;
+  }
+
+  ,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-size: inherit;
+    font-weight: inherit;
+  }
+
+  ,
+  ol,
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  ,
+
+  /* Remove Safari input shadow on mobile */
+  'input[type="text"]' {
+    appearance: 'none';
+  }
+
+  'input[type="email"]' {
+    appearance: 'none';
+  }
+}
+
+@layer utilities {
+  .col-span-1 {
+    --columns-available: 1;
+  }
+
+  .col-span-2 {
+    --columns-available: 2;
+  }
+
+  .col-span-3 {
+    --columns-available: 3;
+  }
+
+  .col-span-4 {
+    --columns-available: 4;
+  }
+
+  .col-span-5 {
+    --columns-available: 5;
+  }
+
+  .col-span-6 {
+    --columns-available: 6;
+  }
+
+  .col-span-7 {
+    --columns-available: 7;
+  }
+
+  .col-span-8 {
+    --columns-available: 8;
+  }
+
+  .col-span-9 {
+    --columns-available: 9;
+  }
+
+  .col-span-10 {
+    --columns-available: 10;
+  }
+
+  .col-span-11 {
+    --columns-available: 11;
+  }
+
+  .col-span-12 {
+    --columns-available: 12;
+  }
+}
