@@ -1,5 +1,6 @@
 'use client';
 import { cn } from '@haxiom/ui';
+import { Button } from '@haxiom/ui/button';
 import { useState } from 'react';
 
 export const runtime = 'edge';
@@ -172,6 +173,12 @@ export default function Home() {
     passTurn();
   };
 
+  const newGame = () => {
+    setBoard(EMPTY_BOARD);
+    setTurn('x');
+    clearPieceToMove();
+  };
+
   return (
     <main className="flex justify-between gap-8">
       <div className="shrink-0 w-fit grid grid-cols-3 grid-rows-3 gap-4">
@@ -221,7 +228,12 @@ export default function Home() {
 
       <div className="flex flex-col justify-between shrink">
         <div>current turn: {turn}</div>
-        <p className="w-full">{DESCRIPTION}</p>
+        <div>
+          <p className="w-full">{DESCRIPTION}</p>
+          <Button className="mr-0 ml-auto block" onClick={newGame}>
+            New game
+          </Button>
+        </div>
       </div>
     </main>
   );
