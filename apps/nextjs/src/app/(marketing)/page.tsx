@@ -258,4 +258,26 @@ The winner is whoever gets 3 in a row vertically, horizontally or diagonally.
 // I prefer using an abstraction to update the Board, where a function takes a new move and returns the new Board. This is a pure function, and it's easy to test.
 //   For the abstraction, I want to use a move notation of 3 characters, the first being the previous position of the piece, the second being the sign of the piece, and the third being the new position of the piece. eg: "1X8". Notice that since the board is represented as an array, 8 is the last one and 9 would be an invalid move. 9 could represent a "generative" move, where the player is adding a new piece to the board.
 
-//
+/*
+TODO:
+- move history as a source of truth (push moves to history, use history to calculate the board)[think about optimizations later]
+- - this will allow time travel + programatically doing moves (eg: a button that makes a specific move (will help with testing not controlling both players), or gesture controls (dnd-kit maybe?))
+
+- write tests
+- - this project actually makes me wanna write them. wtf.
+
+- make the UI pretty
+- - themes?
+
+- tutorial
+
+- game timer
+- points system
+- per player timer (akin to chess)
+
+- multiplayer (partykit??)
+- - rooms?
+- - - spectators?
+
+- share match (eg: encode history into query params, reconstruct game from it)
+ */
