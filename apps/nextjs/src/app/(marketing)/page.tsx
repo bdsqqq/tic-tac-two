@@ -63,6 +63,10 @@ function assertPosition(value: number): asserts value is Position {
   }
 }
 
+function assertPositionOr(value: number | undefined): asserts value is PositionOrGenerative {
+  if (value !== undefined) assertPosition(value);
+}
+
 function assertExists<T>(value: T): asserts value is NonNullable<T> {
   if (value === undefined || value === null) {
     throw new Error('Value does not exist.');
@@ -80,6 +84,40 @@ function makeMove(board: Board, move: Move): Board {
 
 function makeGenerativeMove(sign: Move['sign'], to: Move['to']): Move {
   return { from: undefined, sign, to };
+}
+
+const GENERATIVE_MOVE_CHAR_REPRESENTATION = '-';
+
+function encodeMove(move: Move): string {
+  const { from, sign, to } = move;
+  /**
+   * represent undefined as a dash, so that the move string is always 3 characters long
+   */
+  const fromString = from === undefined ? GENERATIVE_MOVE_CHAR_REPRESENTATION : from.toString();
+  return `${fromString}${sign}${to}`;
+}
+
+function decodeMove(moveString: string): Move {
+  // assert moveString is 3 characters long
+  if (moveString.length !== 3) throw new Error('Invalid move string.');
+
+  const [fromString, sign, toString] = moveString;
+
+  if (fromString === undefined) throw new Error('Invalid move string. from is undefined');
+  if (sign === undefined) throw new Error('Invalid move string. sign is undefined');
+  if (toString === undefined) throw new Error('Invalid move string. to is undefined');
+
+  if (isNaN(parseInt(fromString))) throw new Error('Invalid move string. bad from');
+  if (sign !== 'x' && sign !== 'o') throw new Error('Invalid move string. bad sign');
+  if (isNaN(parseInt(toString))) throw new Error('Invalid move string. bad to');
+
+  const from = fromString === GENERATIVE_MOVE_CHAR_REPRESENTATION ? undefined : parseInt(fromString);
+  assertPositionOr(from);
+
+  const to = parseInt(toString);
+  assertPosition(to);
+
+  return { from, sign, to };
 }
 
 function shouldMoveBeGenerative(board: Board, sign: Sign): boolean {
@@ -122,6 +160,7 @@ export default function Home() {
   const clearPieceToMove = () => setPieceToMove(undefined);
 
   const moveRoutine = (move: Move) => {
+    console.log('move', encodeMove(move));
     const newBoard = makeMove(board, move);
     setBoard(newBoard);
     const winner = checkWinner(newBoard);
