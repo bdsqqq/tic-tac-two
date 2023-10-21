@@ -1,7 +1,24 @@
 'use client';
+import { cn } from '@haxiom/ui';
 import { useState } from 'react';
 
 export const runtime = 'edge';
+
+const WINNING_COMBINATIONS = [
+  // horizontal
+  [0, 1, 2],
+  [3, 4, 5],
+  [6, 7, 8],
+
+  // vertical
+  [0, 3, 6],
+  [1, 4, 7],
+  [2, 5, 8],
+
+  // diagonal
+  [0, 4, 8],
+  [2, 4, 6],
+] as const;
 
 const EMPTY_BOARD: Board = [
   undefined,
@@ -46,6 +63,12 @@ function assertPosition(value: number): asserts value is Position {
   }
 }
 
+function assertExists<T>(value: T): asserts value is NonNullable<T> {
+  if (value === undefined || value === null) {
+    throw new Error('Value does not exist.');
+  }
+}
+
 function makeMove(board: Board, move: Move): Board {
   const newBoard = [...board];
   if (move.from !== undefined) newBoard[move.from] = undefined;
@@ -71,23 +94,48 @@ function isValidMove(board: Board, move: Move): boolean {
   return true;
 }
 
-function isWinningBoard(board: Board): boolean {
-  // TODO
+function checkWinner(board: Board): Sign | false {
+  for (const combination of WINNING_COMBINATIONS) {
+    const [a, b, c] = combination;
+    if (board[a] === undefined) continue;
+    if (board[b] === undefined) continue;
+    if (board[c] === undefined) continue;
+
+    if (board[a] === board[b] && board[b] === board[c]) {
+      // assignment and assertion because TS can't infer that board[a] is not undefined
+      const winner = board[a];
+      assertExists(winner);
+      return winner;
+    }
+  }
+
   return false;
 }
 
 export default function Home() {
   const [board, setBoard] = useState<Board>(EMPTY_BOARD);
   const [turn, setTurn] = useState<'x' | 'o'>('x');
-
   const nextTurn = turn === 'x' ? 'o' : 'x';
+  const passTurn = () => setTurn(nextTurn);
 
   const [pieceToMove, setPieceToMove] = useState<Position | undefined>(undefined);
   const clearPieceToMove = () => setPieceToMove(undefined);
 
+  const moveRoutine = (move: Move) => {
+    const newBoard = makeMove(board, move);
+    setBoard(newBoard);
+    const winner = checkWinner(newBoard);
+    clearPieceToMove();
+    if (winner) {
+      console.log('🎉🎉 ', winner, ' wins 🎉🎉');
+      return;
+    }
+    passTurn();
+  };
+
   return (
-    <main className="flex justify-evenly">
-      <div className="w-fit grid grid-cols-3 grid-rows-3 gap-4">
+    <main className="flex justify-between gap-8">
+      <div className="shrink-0 w-fit grid grid-cols-3 grid-rows-3 gap-4">
         {board.map((cell, index) => (
           <button
             onClick={(e) => {
@@ -101,14 +149,14 @@ export default function Home() {
               // check if move should be generative
               if (shouldMoveBeGenerative(board, turn)) {
                 const move = makeGenerativeMove(turn, index);
-                const newBoard = makeMove(board, move);
-                setBoard(newBoard);
-                setTurn(nextTurn);
+                moveRoutine(move);
                 return;
               }
 
               // select piece to move
               if (pieceToMove === undefined) {
+                // can't select empty cell
+                if (cell === undefined) return;
                 setPieceToMove(index);
                 return;
               }
@@ -122,26 +170,29 @@ export default function Home() {
               // move piece
               const move = { from: pieceToMove, sign: turn, to: index };
               if (!isValidMove(board, move)) return;
-              const newBoard = makeMove(board, move);
-              setBoard(newBoard);
+              moveRoutine(move);
             }}
             key={index}
-            className="bg-gray-3 w-40 h-40"
+            className={cn('bg-gray-3 w-40 h-40', pieceToMove === index && 'bg-gray-5')}
           >
             {cell}
           </button>
         ))}
       </div>
 
-      <div>
+      <div className="flex flex-col justify-between shrink">
         <div>current turn: {turn}</div>
-        <pre>
-          <code>{JSON.stringify(board, null, 2)}</code>
-        </pre>
+        <p className="w-full">{DESCRIPTION}</p>
       </div>
     </main>
   );
 }
+
+const DESCRIPTION = `
+tic-tac-two aims to solve draws.
+
+players put 3 of their respective pieces (x, o) in the field normally.
+Once 3 pieces are in the field, you can't put new ones, but instead move the ones in the field.`;
 
 /*
 tic-tac-two aims to solve draws.
