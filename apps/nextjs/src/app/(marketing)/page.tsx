@@ -180,7 +180,7 @@ export default function Home() {
   };
 
   return (
-    <main className="flex justify-between gap-8">
+    <main className="flex flex-col md:flex-row md:justify-between gap-8">
       <div className="shrink-0 w-fit grid grid-cols-3 grid-rows-3 gap-2">
         {board.map((cell, index) => (
           <Cell key={index} highlight={pieceToMove === index}>
