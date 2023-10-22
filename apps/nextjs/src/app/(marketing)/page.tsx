@@ -1,7 +1,7 @@
 'use client';
 import { cn } from '@haxiom/ui';
 import { Button } from '@haxiom/ui/button';
-import { useState } from 'react';
+import { forwardRef, useState } from 'react';
 
 export const runtime = 'edge';
 
@@ -181,48 +181,59 @@ export default function Home() {
 
   return (
     <main className="flex justify-between gap-8">
-      <div className="shrink-0 w-fit grid grid-cols-3 grid-rows-3 gap-4">
+      <div className="shrink-0 w-fit grid grid-cols-3 grid-rows-3 gap-2">
         {board.map((cell, index) => (
-          <button
-            onClick={(e) => {
-              e.preventDefault();
+          <Cell key={index} highlight={pieceToMove === index}>
+            {cell !== undefined ? (
+              <Piece
+                onClick={() => {
+                  assertPosition(index);
 
-              assertPosition(index);
+                  // check if piece is yours, no action allowed if it's not
+                  if (cell !== undefined && cell !== turn) return;
 
-              // check if piece is yours, no action allowed if it's not
-              if (cell !== undefined && cell !== turn) return;
+                  // only allow selecting if out of generative moves
+                  if (shouldMoveBeGenerative(board, turn)) return;
 
-              // check if move should be generative
-              if (shouldMoveBeGenerative(board, turn)) {
-                const move = makeGenerativeMove(turn, index);
-                moveRoutine(move);
-                return;
-              }
+                  // select piece to move
+                  if (pieceToMove === undefined) {
+                    // can't select empty cell
+                    if (cell === undefined) return;
+                    setPieceToMove(index);
+                    return;
+                  }
 
-              // select piece to move
-              if (pieceToMove === undefined) {
-                // can't select empty cell
-                if (cell === undefined) return;
-                setPieceToMove(index);
-                return;
-              }
+                  // if clicked on the same piece, deselect it
+                  if (pieceToMove === index) {
+                    clearPieceToMove();
+                    return;
+                  }
+                }}
+              >
+                {cell}
+              </Piece>
+            ) : (
+              <Empty
+                onClick={() => {
+                  assertPosition(index);
 
-              // if clicked on the same piece, deselect it
-              if (pieceToMove === index) {
-                clearPieceToMove();
-                return;
-              }
+                  // check if move should be generative
+                  if (shouldMoveBeGenerative(board, turn)) {
+                    const move = makeGenerativeMove(turn, index);
+                    moveRoutine(move);
+                    return;
+                  }
 
-              // move piece
-              const move = { from: pieceToMove, sign: turn, to: index };
-              if (!isValidMove(board, move)) return;
-              moveRoutine(move);
-            }}
-            key={index}
-            className={cn('bg-gray-3 w-40 h-40', pieceToMove === index && 'bg-gray-5')}
-          >
-            {cell}
-          </button>
+                  // move piece
+                  if (pieceToMove) {
+                    const move = { from: pieceToMove, sign: turn, to: index };
+                    if (!isValidMove(board, move)) return;
+                    moveRoutine(move);
+                  }
+                }}
+              />
+            )}
+          </Cell>
         ))}
       </div>
 
@@ -238,6 +249,39 @@ export default function Home() {
     </main>
   );
 }
+
+const Cell = ({
+  children,
+  highlight,
+  ...rest
+}: React.HTMLProps<HTMLDivElement> & {
+  children: React.ReactNode;
+  highlight: boolean;
+}) => {
+  return (
+    <div {...rest} className={cn('bg-gray-3 p-2 rounded w-40 h-40', highlight && 'bg-gray-9')}>
+      {children}
+    </div>
+  );
+};
+
+export type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement>;
+
+const Empty = forwardRef<HTMLButtonElement, ButtonProps>(({ ...rest }, ref) => {
+  return (
+    <button {...rest} className="flex justify-center items-center bg-transparent rounded-md h-full w-full" ref={ref} />
+  );
+});
+Empty.displayName = 'Empty';
+
+const Piece = forwardRef<HTMLButtonElement, ButtonProps>(({ children, ...rest }, ref) => {
+  return (
+    <button {...rest} className="flex justify-center items-center bg-subtle rounded-md h-full w-full" ref={ref}>
+      <div className="font-bold text-7xl">{children}</div>
+    </button>
+  );
+});
+Piece.displayName = 'Piece';
 
 const DESCRIPTION = `
 tic-tac-two aims to solve draws.
