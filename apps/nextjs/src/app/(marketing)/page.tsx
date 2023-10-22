@@ -225,7 +225,8 @@ export default function Home() {
                   }
 
                   // move piece
-                  if (pieceToMove) {
+                  if (pieceToMove !== undefined) {
+                    // explicitly compare against undefined. piece could be 0 which is falsy.
                     const move = { from: pieceToMove, sign: turn, to: index };
                     if (!isValidMove(board, move)) return;
                     moveRoutine(move);
