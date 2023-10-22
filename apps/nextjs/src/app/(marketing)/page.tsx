@@ -33,7 +33,7 @@ const EMPTY_BOARD: Board = [
   undefined,
 ];
 
-const GENERATIVE_MOVE_AMMOUNT = 3;
+const GENERATIVE_MOVE_AMOUNT = 3;
 
 type Sign = 'x' | 'o';
 type Cell = Sign | undefined;
@@ -122,7 +122,7 @@ function decodeMove(moveString: string): Move {
 }
 
 function shouldMoveBeGenerative(board: Board, sign: Sign): boolean {
-  return board.filter((piece) => piece === sign).length < GENERATIVE_MOVE_AMMOUNT;
+  return board.filter((piece) => piece === sign).length < GENERATIVE_MOVE_AMOUNT;
 }
 
 function isValidMove(board: Board, move: Move): boolean {
