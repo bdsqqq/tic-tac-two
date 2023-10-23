@@ -74,6 +74,10 @@ function assertExists<T>(value: T): asserts value is NonNullable<T> {
   }
 }
 
+function makeGenerativeMove(sign: Move['sign'], to: Move['to']): Move {
+  return { from: undefined, sign, to };
+}
+
 function makeMove(board: Board, move: Move): Board {
   const newBoard = [...board];
   if (move.from !== undefined) newBoard[move.from] = undefined;
@@ -83,9 +87,20 @@ function makeMove(board: Board, move: Move): Board {
   return newBoard;
 }
 
-function makeGenerativeMove(sign: Move['sign'], to: Move['to']): Move {
-  return { from: undefined, sign, to };
-}
+type MoveHistory = Move[];
+
+/**
+ * Assumes all moves in History are valid.
+ */
+const computeBoardFromHistory = (history: MoveHistory): Board => {
+  const board = [...EMPTY_BOARD];
+  for (const move of history) {
+    board[move.to] = move.sign;
+  }
+
+  assertBoardLength(board);
+  return board;
+};
 
 const GENERATIVE_MOVE_CHAR_REPRESENTATION = '-';
 
@@ -195,13 +210,10 @@ export default function Home() {
                   // only allow selecting if out of generative moves
                   if (shouldMoveBeGenerative(board, turn)) return;
 
-                  // select piece to move
-                  if (pieceToMove === undefined) {
-                    // can't select empty cell
-                    if (cell === undefined) return;
-                    setPieceToMove(index);
-                    return;
-                  }
+                  // can't select empty cell
+                  if (cell === undefined) return;
+                  setPieceToMove(index);
+                  return;
 
                   // if clicked on the same piece, deselect it
                   if (pieceToMove === index) {
@@ -266,7 +278,7 @@ const Cell = ({
   );
 };
 
-export type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement>;
+type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement>;
 
 const Empty = forwardRef<HTMLButtonElement, ButtonProps>(({ ...rest }, ref) => {
   return (
