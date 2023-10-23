@@ -96,11 +96,18 @@ type MoveHistory = Move[];
 /**
  * Assumes all moves in History are valid.
  */
-const computeBoardFromHistory = (history: MoveHistory): Board => {
-  const board = [...EMPTY_BOARD];
+const computeBoardFromHistory = (history: MoveHistory, index?: number): Board => {
+  if (index !== undefined && index < 0) throw new Error(`Invalid history index. got ${index}`);
+  if (index !== undefined && index > history.length)
+    throw new Error(`Cannot go to future, got ${index} but history length is ${history.length}`);
+
+  let board = [...EMPTY_BOARD];
   for (const move of history) {
-    if (move.from !== undefined) board[move.from] = undefined;
-    board[move.to] = move.sign;
+    // if index is defined, stop at that index
+    if (index !== undefined && move === history[index]) break;
+
+    assertBoardLength(board);
+    board = makeMove(board, move);
   }
 
   assertBoardLength(board);
@@ -202,16 +209,40 @@ export default function Home() {
   const clearPieceToMove = () => setPieceToMove(undefined);
 
   const [history, setHistory] = useState<MoveHistory>(decodedHistory);
+  const [historyIndex, setHistoryIndex] = useState<number>(history.length);
+  const incrementHistoryIndex = () => {
+    if (historyIndex === history.length) return;
+    setHistoryIndex(historyIndex + 1);
+  };
+  const decrementHistoryIndex = () => {
+    if (historyIndex === 0) return;
+    setHistoryIndex(historyIndex - 1);
+  };
+
+  const [upToDate, setUpToDate] = useState<boolean>(true);
 
   const [gameLocked, setGameLocked] = useState(false);
 
   useEffect(() => {
-    setBoard(computeBoardFromHistory(history));
-  }, [history]);
+    setGameLocked(false);
+    if (historyIndex === history.length) return;
+    setGameLocked(true);
+  }, [historyIndex, history]);
+
+  useEffect(() => {
+    setBoard(computeBoardFromHistory(history, historyIndex));
+
+    if (historyIndex === history.length) {
+      setUpToDate(true);
+    }
+
+    if (historyIndex < history.length) {
+      setUpToDate(false);
+    }
+  }, [history, historyIndex]);
 
   useEffect(() => {
     const winner = checkWinner(board);
-    setGameLocked(false);
     if (winner) {
       setGameLocked(true);
       console.log('🎉🎉 ', winner, ' wins 🎉🎉');
@@ -231,11 +262,14 @@ export default function Home() {
   const moveRoutine = (move: Move) => {
     console.log('move', encodeMove(move));
     setHistory([...history, move]);
+    if (upToDate) setHistoryIndex(historyIndex + 1);
     passTurn();
   };
 
   const newGame = () => {
+    setHistoryIndex(0);
     setHistory([]);
+    setGameLocked(false);
     router.push('/');
 
     setTurn('x');
@@ -246,7 +280,7 @@ export default function Home() {
     <main className="flex flex-col md:flex-row md:justify-between gap-8">
       <div className="shrink-0 w-fit grid grid-cols-3 grid-rows-3 gap-2">
         {board.map((cell, index) => (
-          <Cell key={index} highlight={pieceToMove === index}>
+          <Cell key={index} highlight={upToDate && pieceToMove === index}>
             {cell !== undefined ? (
               <Piece
                 onClick={() => {
@@ -260,7 +294,9 @@ export default function Home() {
 
                   // if clicked on the same piece, deselect it
                   if (pieceToMove === index) {
-                    clearPieceToMove();
+                    attemptAction(() => {
+                      clearPieceToMove();
+                    });
                     return;
                   }
 
@@ -305,7 +341,52 @@ export default function Home() {
       </div>
 
       <div className="flex flex-col justify-between shrink">
-        <div>current turn: {turn}</div>
+        <div>
+          current turn: {turn} - locked: {gameLocked ? 'yes' : 'no'}
+        </div>
+
+        <div>{history.map(encodeMove).join(', ')}</div>
+        <div>
+          <Button
+            options={{
+              variant: 'outline',
+            }}
+            onClick={() => {
+              if (history.length < 1) return;
+              setHistoryIndex(1);
+            }}
+          >
+            first
+          </Button>
+          <Button
+            options={{
+              variant: 'outline',
+            }}
+            onClick={decrementHistoryIndex}
+          >
+            prev.
+          </Button>
+          <Button
+            options={{
+              variant: 'outline',
+            }}
+            onClick={incrementHistoryIndex}
+          >
+            next
+          </Button>
+          <Button
+            options={{
+              variant: 'outline',
+            }}
+            onClick={() => {
+              setHistoryIndex(history.length);
+            }}
+          >
+            last
+          </Button>
+          current move: {historyIndex} / {history.length}
+        </div>
+
         {/* TODO: extract history into a component */}
         <Table className="w-fit h-full">
           <TableBody className="border whitespace-nowrap font-mono">
