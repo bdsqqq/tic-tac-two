@@ -207,6 +207,7 @@ export default function Home() {
 
   useEffect(() => {
     const winner = checkWinner(board);
+    setGameLocked(false);
     if (winner) {
       setGameLocked(true);
       console.log('🎉🎉 ', winner, ' wins 🎉🎉');
