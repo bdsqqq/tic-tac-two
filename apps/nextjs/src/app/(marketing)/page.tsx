@@ -199,6 +199,8 @@ export default function Home() {
 
   const [history, setHistory] = useState<MoveHistory>(decodedHistory);
 
+  const [gameLocked, setGameLocked] = useState(false);
+
   useEffect(() => {
     setBoard(computeBoardFromHistory(history));
   }, [history]);
@@ -206,6 +208,7 @@ export default function Home() {
   useEffect(() => {
     const winner = checkWinner(board);
     if (winner) {
+      setGameLocked(true);
       console.log('🎉🎉 ', winner, ' wins 🎉🎉');
       return;
     }
@@ -214,6 +217,11 @@ export default function Home() {
   useEffect(() => {
     clearPieceToMove();
   }, [turn]);
+
+  const attemptAction = (action: () => void) => {
+    if (gameLocked) return;
+    action();
+  };
 
   const moveRoutine = (move: Move) => {
     console.log('move', encodeMove(move));
@@ -253,7 +261,9 @@ export default function Home() {
 
                   // can't select empty cell
                   if (cell === undefined) return;
-                  setPieceToMove(index);
+                  attemptAction(() => {
+                    setPieceToMove(index);
+                  });
                   return;
                 }}
               >
@@ -267,7 +277,9 @@ export default function Home() {
                   // check if move should be generative
                   if (shouldMoveBeGenerative(board, turn)) {
                     const move = makeGenerativeMove(turn, index);
-                    moveRoutine(move);
+                    attemptAction(() => {
+                      moveRoutine(move);
+                    });
                     return;
                   }
 
@@ -276,7 +288,9 @@ export default function Home() {
                     // explicitly compare against undefined. piece could be 0 which is falsy.
                     const move = { from: pieceToMove, sign: turn, to: index };
                     if (!isValidMove(board, move)) return;
-                    moveRoutine(move);
+                    attemptAction(() => {
+                      moveRoutine(move);
+                    });
                   }
                 }}
               />
