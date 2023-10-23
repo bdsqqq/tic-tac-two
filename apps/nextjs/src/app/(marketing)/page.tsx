@@ -117,10 +117,10 @@ function encodeMove(move: Move): string {
   const fromString = from === undefined ? GENERATIVE_MOVE_CHAR_REPRESENTATION : from.toString();
   return `${fromString}${sign}${to}`;
 }
+const ENCODED_MOVE_LENGTH = 3;
 
 function decodeMove(moveString: string): Move {
-  // assert moveString is 3 characters long
-  if (moveString.length !== 3) throw new Error('Invalid move string.');
+  if (moveString.length !== ENCODED_MOVE_LENGTH) throw new Error('Invalid move string.');
 
   const [fromString, sign, toString] = moveString;
 
@@ -142,15 +142,19 @@ function decodeMove(moveString: string): Move {
   return { from, sign, to };
 }
 
-function base64EncodeHistory(history: MoveHistory): string {
-  return btoa(JSON.stringify(history.map(encodeMove)));
+function encodeHistory(history: MoveHistory): string {
+  return history.map(encodeMove).join('');
 }
 
-function base64DecodeHistory(base64EncodedHistory: string): MoveHistory {
-  const decodedHistory = atob(base64EncodedHistory);
-  const parsedHistory = JSON.parse(decodedHistory) as string[];
+function decodeHistory(historyString: string): MoveHistory {
+  const multipleOfEncodedMoveLenghtExpression = new RegExp(`.{${ENCODED_MOVE_LENGTH}}`, 'g');
+  const moves = historyString.match(multipleOfEncodedMoveLenghtExpression);
+  if (moves === null)
+    throw new Error(
+      `Invalid history string. Expected length to be a multiple of ${ENCODED_MOVE_LENGTH}. got ${historyString.length}`
+    );
 
-  return parsedHistory.map(decodeMove);
+  return moves.map(decodeMove);
 }
 
 function shouldMoveBeGenerative(board: Board, sign: Sign): boolean {
@@ -186,8 +190,8 @@ function checkWinner(board: Board): Sign | false {
 export default function Home() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const base64EncodedHistory = searchParams.get('history');
-  const decodedHistory = base64EncodedHistory ? base64DecodeHistory(base64EncodedHistory) : [];
+  const encodedHistory = searchParams.get('history');
+  const decodedHistory = encodedHistory ? decodeHistory(encodedHistory) : [];
 
   const [board, setBoard] = useState<Board>(EMPTY_BOARD);
   const [turn, setTurn] = useState<'x' | 'o'>('x');
@@ -352,7 +356,7 @@ export default function Home() {
                   {/* TODO: "url with copy button attached" is a pattern common enough that it warrants a component, especially since displaying the copy state tends to be annoying to do every time */}
                   <Input
                     className="border rounded py-1.5 h-auto "
-                    value={`${window.location.origin}?history=${base64EncodeHistory(history)}`}
+                    value={`${window.location.origin}?history=${encodeHistory(history)}`}
                     readOnly
                   />
                   <Button
@@ -360,7 +364,7 @@ export default function Home() {
                     options={{ variant: 'outline' }}
                     onClick={async () => {
                       await navigator.clipboard.writeText(
-                        `${window.location.origin}?history=${base64EncodeHistory(history)}`
+                        `${window.location.origin}?history=${encodeHistory(history)}`
                       );
                     }}
                   >
