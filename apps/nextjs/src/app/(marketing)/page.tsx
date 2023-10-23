@@ -175,13 +175,17 @@ export default function Home() {
   const [pieceToMove, setPieceToMove] = useState<Position | undefined>(undefined);
   const clearPieceToMove = () => setPieceToMove(undefined);
 
+  const [history, setHistory] = useState<MoveHistory>([]);
+
   const moveRoutine = (move: Move) => {
     console.log('move', encodeMove(move));
     const newBoard = makeMove(board, move);
     setBoard(newBoard);
+    setHistory([...history, move]);
     const winner = checkWinner(newBoard);
     clearPieceToMove();
     if (winner) {
+      console.log('history', history.map(encodeMove));
       console.log('🎉🎉 ', winner, ' wins 🎉🎉');
       return;
     }
