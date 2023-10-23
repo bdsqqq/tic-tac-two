@@ -1,7 +1,11 @@
 'use client';
 import { cn } from '@haxiom/ui';
 import { Button } from '@haxiom/ui/button';
-import { forwardRef, useState } from 'react';
+import { Input } from '@haxiom/ui/input';
+import { Popover, PopoverContent, PopoverTrigger } from '@haxiom/ui/popover';
+import { Table, TableBody, TableRow, TableFooter } from '@haxiom/ui/table';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { forwardRef, useEffect, useState } from 'react';
 
 export const runtime = 'edge';
 
@@ -95,6 +99,7 @@ type MoveHistory = Move[];
 const computeBoardFromHistory = (history: MoveHistory): Board => {
   const board = [...EMPTY_BOARD];
   for (const move of history) {
+    if (move.from !== undefined) board[move.from] = undefined;
     board[move.to] = move.sign;
   }
 
@@ -123,7 +128,8 @@ function decodeMove(moveString: string): Move {
   if (sign === undefined) throw new Error('Invalid move string. sign is undefined');
   if (toString === undefined) throw new Error('Invalid move string. to is undefined');
 
-  if (isNaN(parseInt(fromString))) throw new Error('Invalid move string. bad from');
+  if (isNaN(parseInt(fromString)) && fromString !== GENERATIVE_MOVE_CHAR_REPRESENTATION)
+    throw new Error(`Invalid move string. bad from: ${fromString}`);
   if (sign !== 'x' && sign !== 'o') throw new Error('Invalid move string. bad sign');
   if (isNaN(parseInt(toString))) throw new Error('Invalid move string. bad to');
 
@@ -134,6 +140,17 @@ function decodeMove(moveString: string): Move {
   assertPosition(to);
 
   return { from, sign, to };
+}
+
+function base64EncodeHistory(history: MoveHistory): string {
+  return btoa(JSON.stringify(history.map(encodeMove)));
+}
+
+function base64DecodeHistory(base64EncodedHistory: string): MoveHistory {
+  const decodedHistory = atob(base64EncodedHistory);
+  const parsedHistory = JSON.parse(decodedHistory) as string[];
+
+  return parsedHistory.map(decodeMove);
 }
 
 function shouldMoveBeGenerative(board: Board, sign: Sign): boolean {
@@ -167,6 +184,11 @@ function checkWinner(board: Board): Sign | false {
 }
 
 export default function Home() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const base64EncodedHistory = searchParams.get('history');
+  const decodedHistory = base64EncodedHistory ? base64DecodeHistory(base64EncodedHistory) : [];
+
   const [board, setBoard] = useState<Board>(EMPTY_BOARD);
   const [turn, setTurn] = useState<'x' | 'o'>('x');
   const nextTurn = turn === 'x' ? 'o' : 'x';
@@ -175,25 +197,34 @@ export default function Home() {
   const [pieceToMove, setPieceToMove] = useState<Position | undefined>(undefined);
   const clearPieceToMove = () => setPieceToMove(undefined);
 
-  const [history, setHistory] = useState<MoveHistory>([]);
+  const [history, setHistory] = useState<MoveHistory>(decodedHistory);
 
-  const moveRoutine = (move: Move) => {
-    console.log('move', encodeMove(move));
-    const newBoard = makeMove(board, move);
-    setBoard(newBoard);
-    setHistory([...history, move]);
-    const winner = checkWinner(newBoard);
-    clearPieceToMove();
+  useEffect(() => {
+    setBoard(computeBoardFromHistory(history));
+  }, [history]);
+
+  useEffect(() => {
+    const winner = checkWinner(board);
     if (winner) {
-      console.log('history', history.map(encodeMove));
       console.log('🎉🎉 ', winner, ' wins 🎉🎉');
       return;
     }
+  }, [board]);
+
+  useEffect(() => {
+    clearPieceToMove();
+  }, [turn]);
+
+  const moveRoutine = (move: Move) => {
+    console.log('move', encodeMove(move));
+    setHistory([...history, move]);
     passTurn();
   };
 
   const newGame = () => {
-    setBoard(EMPTY_BOARD);
+    setHistory([]);
+    router.push('/');
+
     setTurn('x');
     clearPieceToMove();
   };
@@ -214,16 +245,16 @@ export default function Home() {
                   // only allow selecting if out of generative moves
                   if (shouldMoveBeGenerative(board, turn)) return;
 
-                  // can't select empty cell
-                  if (cell === undefined) return;
-                  setPieceToMove(index);
-                  return;
-
                   // if clicked on the same piece, deselect it
                   if (pieceToMove === index) {
                     clearPieceToMove();
                     return;
                   }
+
+                  // can't select empty cell
+                  if (cell === undefined) return;
+                  setPieceToMove(index);
+                  return;
                 }}
               >
                 {cell}
@@ -256,6 +287,75 @@ export default function Home() {
 
       <div className="flex flex-col justify-between shrink">
         <div>current turn: {turn}</div>
+        {/* TODO: extract history into a component */}
+        <Table className="w-fit h-full">
+          <TableBody className="border whitespace-nowrap font-mono">
+            {history.length === 0 ? (
+              <TableRow
+                className="grid grid-cols-3 even:bg-element hover:bg-gray-1 even:hover:bg-element gap-4 p-2"
+                key={'placeholder'}
+              >
+                {/* TODO: chess.com has slots on the sides of moves to signify blunders, good moves, etc. I'm most interested in "this was the winning move", but maybe it's cool to make analysis since tic tac toe is a finite game and analysis would only need low depths. */}
+                <td className="text-end">1.</td>
+                <td className="text-transparent">...</td>
+                <td className="text-transparent">...</td>
+              </TableRow>
+            ) : null}
+
+            {history.map((move, index) => {
+              if (index % 2 === 0) {
+                const player1Move = move;
+                const player2Move = history[index + 1];
+
+                return (
+                  <TableRow
+                    className="grid grid-cols-3 even:bg-element hover:bg-gray-1 even:hover:bg-element gap-4 p-2"
+                    key={index}
+                  >
+                    <td className="text-end">{Math.ceil(index / 2 + 1)}.</td>
+                    <td className="">{encodeMove(player1Move)}</td>
+                    <td className="">{player2Move !== undefined ? encodeMove(player2Move) : null}</td>
+                  </TableRow>
+                );
+              }
+            })}
+          </TableBody>
+          <TableFooter>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  options={{
+                    variant: 'outline',
+                  }}
+                  className="mr-0 ml-auto block w-full"
+                >
+                  Share game state
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="p-0 border-none" align="start" side="top">
+                <div className="flex [&>*:not(:first-child)]:-ml-px">
+                  {/* TODO: "url with copy button attached" is a pattern common enough that it warrants a component, especially since displaying the copy state tends to be annoying to do every time */}
+                  <Input
+                    className="border rounded py-1.5 h-auto "
+                    value={`${window.location.origin}?history=${base64EncodeHistory(history)}`}
+                    readOnly
+                  />
+                  <Button
+                    className="whitespace-nowrap -ml-px"
+                    options={{ variant: 'outline' }}
+                    onClick={async () => {
+                      await navigator.clipboard.writeText(
+                        `${window.location.origin}?history=${base64EncodeHistory(history)}`
+                      );
+                    }}
+                  >
+                    Copy link
+                  </Button>
+                </div>
+              </PopoverContent>
+            </Popover>
+          </TableFooter>
+        </Table>
         <div>
           <p className="w-full">{DESCRIPTION}</p>
           <Button className="mr-0 ml-auto block" onClick={newGame}>
