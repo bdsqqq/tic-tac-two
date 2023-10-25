@@ -1,11 +1,13 @@
 'use client';
 import { cn } from '@haxiom/ui';
+import type { ButtonProps as UiButtonProps } from '@haxiom/ui/button';
 import { Button } from '@haxiom/ui/button';
 import { Input } from '@haxiom/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@haxiom/ui/popover';
 import { Table, TableBody, TableRow, TableFooter } from '@haxiom/ui/table';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { forwardRef, useEffect, useState } from 'react';
+import type { ReactNode } from 'react';
+import { createContext, forwardRef, useContext, useEffect, useState } from 'react';
 
 export const runtime = 'edge';
 
@@ -200,269 +202,24 @@ export default function Home() {
   const encodedHistory = searchParams.get('history');
   const decodedHistory = encodedHistory ? decodeHistory(encodedHistory) : [];
 
-  const [board, setBoard] = useState<Board>(EMPTY_BOARD);
-  const [turn, setTurn] = useState<'x' | 'o'>('x');
-  const nextTurn = turn === 'x' ? 'o' : 'x';
-  const passTurn = () => setTurn(nextTurn);
-
-  const [pieceToMove, setPieceToMove] = useState<Position | undefined>(undefined);
-  const clearPieceToMove = () => setPieceToMove(undefined);
-
-  const [history, setHistory] = useState<MoveHistory>(decodedHistory);
-  const [historyIndex, setHistoryIndex] = useState<number>(history.length);
-  const incrementHistoryIndex = () => {
-    if (historyIndex === history.length) return;
-    setHistoryIndex(historyIndex + 1);
-  };
-  const decrementHistoryIndex = () => {
-    if (historyIndex === 0) return;
-    setHistoryIndex(historyIndex - 1);
-  };
-
-  const [upToDate, setUpToDate] = useState<boolean>(true);
-
-  const [gameLocked, setGameLocked] = useState(false);
-
-  useEffect(() => {
-    setGameLocked(false);
-    if (historyIndex === history.length) return;
-    setGameLocked(true);
-  }, [historyIndex, history]);
-
-  useEffect(() => {
-    setBoard(computeBoardFromHistory(history, historyIndex));
-
-    if (historyIndex === history.length) {
-      setUpToDate(true);
-    }
-
-    if (historyIndex < history.length) {
-      setUpToDate(false);
-    }
-  }, [history, historyIndex]);
-
-  useEffect(() => {
-    const winner = checkWinner(board);
-    if (winner) {
-      setGameLocked(true);
-      console.log('🎉🎉 ', winner, ' wins 🎉🎉');
-      return;
-    }
-  }, [board]);
-
-  useEffect(() => {
-    clearPieceToMove();
-  }, [turn]);
-
-  const attemptAction = (action: () => void) => {
-    if (gameLocked) return;
-    action();
-  };
-
-  const moveRoutine = (move: Move) => {
-    console.log('move', encodeMove(move));
-    setHistory([...history, move]);
-    if (upToDate) setHistoryIndex(historyIndex + 1);
-    passTurn();
-  };
-
-  const newGame = () => {
-    setHistoryIndex(0);
-    setHistory([]);
-    setGameLocked(false);
-    router.push('/');
-
-    setTurn('x');
-    clearPieceToMove();
-  };
-
   return (
     <main className="flex flex-col md:flex-row md:justify-between gap-8">
-      <div className="shrink-0 w-fit grid grid-cols-3 grid-rows-3 gap-2">
-        {board.map((cell, index) => (
-          <Cell key={index} highlight={upToDate && pieceToMove === index}>
-            {cell !== undefined ? (
-              <Piece
-                onClick={() => {
-                  assertPosition(index);
-
-                  // check if piece is yours, no action allowed if it's not
-                  if (cell !== undefined && cell !== turn) return;
-
-                  // only allow selecting if out of generative moves
-                  if (shouldMoveBeGenerative(board, turn)) return;
-
-                  // if clicked on the same piece, deselect it
-                  if (pieceToMove === index) {
-                    attemptAction(() => {
-                      clearPieceToMove();
-                    });
-                    return;
-                  }
-
-                  // can't select empty cell
-                  if (cell === undefined) return;
-                  attemptAction(() => {
-                    setPieceToMove(index);
-                  });
-                  return;
-                }}
-              >
-                {cell}
-              </Piece>
-            ) : (
-              <Empty
-                onClick={() => {
-                  assertPosition(index);
-
-                  // check if move should be generative
-                  if (shouldMoveBeGenerative(board, turn)) {
-                    const move = makeGenerativeMove(turn, index);
-                    attemptAction(() => {
-                      moveRoutine(move);
-                    });
-                    return;
-                  }
-
-                  // move piece
-                  if (pieceToMove !== undefined) {
-                    // explicitly compare against undefined. piece could be 0 which is falsy.
-                    const move = { from: pieceToMove, sign: turn, to: index };
-                    if (!isValidMove(board, move)) return;
-                    attemptAction(() => {
-                      moveRoutine(move);
-                    });
-                  }
-                }}
-              />
-            )}
-          </Cell>
-        ))}
-      </div>
-
-      <div className="flex flex-col justify-between shrink">
-        <div>
-          current turn: {turn} - locked: {gameLocked ? 'yes' : 'no'}
+      <Game>
+        <div className="shrink-0">
+          <Board />
         </div>
 
-        <div>{history.map(encodeMove).join(', ')}</div>
-        <div>
-          <Button
-            options={{
-              variant: 'outline',
-            }}
-            onClick={() => {
-              if (history.length < 1) return;
-              setHistoryIndex(1);
-            }}
-          >
-            first
-          </Button>
-          <Button
-            options={{
-              variant: 'outline',
-            }}
-            onClick={decrementHistoryIndex}
-          >
-            prev.
-          </Button>
-          <Button
-            options={{
-              variant: 'outline',
-            }}
-            onClick={incrementHistoryIndex}
-          >
-            next
-          </Button>
-          <Button
-            options={{
-              variant: 'outline',
-            }}
-            onClick={() => {
-              setHistoryIndex(history.length);
-            }}
-          >
-            last
-          </Button>
-          current move: {historyIndex} / {history.length}
+        <div className="flex flex-col justify-between shrink">
+          <CurrentTurn />
+          <History />
+          <HistoryControls />
+
+          <div>
+            <p className="w-full">{DESCRIPTION}</p>
+            <NewGameButton className="mr-0 ml-auto block">New game</NewGameButton>
+          </div>
         </div>
-
-        {/* TODO: extract history into a component */}
-        <Table className="w-fit h-full">
-          <TableBody className="border whitespace-nowrap font-mono">
-            {history.length === 0 ? (
-              <TableRow
-                className="grid grid-cols-3 even:bg-element hover:bg-gray-1 even:hover:bg-element gap-4 p-2"
-                key={'placeholder'}
-              >
-                {/* TODO: chess.com has slots on the sides of moves to signify blunders, good moves, etc. I'm most interested in "this was the winning move", but maybe it's cool to make analysis since tic tac toe is a finite game and analysis would only need low depths. */}
-                <td className="text-end">1.</td>
-                <td className="text-transparent">...</td>
-                <td className="text-transparent">...</td>
-              </TableRow>
-            ) : null}
-
-            {history.map((move, index) => {
-              if (index % 2 === 0) {
-                const player1Move = move;
-                const player2Move = history[index + 1];
-
-                return (
-                  <TableRow
-                    className="grid grid-cols-3 even:bg-element hover:bg-gray-1 even:hover:bg-element gap-4 p-2"
-                    key={index}
-                  >
-                    <td className="text-end">{Math.ceil(index / 2 + 1)}.</td>
-                    <td className="">{encodeMove(player1Move)}</td>
-                    <td className="">{player2Move !== undefined ? encodeMove(player2Move) : null}</td>
-                  </TableRow>
-                );
-              }
-            })}
-          </TableBody>
-          <TableFooter>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  options={{
-                    variant: 'outline',
-                  }}
-                  className="mr-0 ml-auto block w-full"
-                >
-                  Share game state
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="p-0 border-none" align="start" side="top">
-                <div className="flex [&>*:not(:first-child)]:-ml-px">
-                  {/* TODO: "url with copy button attached" is a pattern common enough that it warrants a component, especially since displaying the copy state tends to be annoying to do every time */}
-                  <Input
-                    className="border rounded py-1.5 h-auto "
-                    value={`${window.location.origin}?history=${encodeHistory(history)}`}
-                    readOnly
-                  />
-                  <Button
-                    className="whitespace-nowrap -ml-px"
-                    options={{ variant: 'outline' }}
-                    onClick={async () => {
-                      await navigator.clipboard.writeText(
-                        `${window.location.origin}?history=${encodeHistory(history)}`
-                      );
-                    }}
-                  >
-                    Copy link
-                  </Button>
-                </div>
-              </PopoverContent>
-            </Popover>
-          </TableFooter>
-        </Table>
-        <div>
-          <p className="w-full">{DESCRIPTION}</p>
-          <Button className="mr-0 ml-auto block" onClick={newGame}>
-            New game
-          </Button>
-        </div>
-      </div>
+      </Game>
     </main>
   );
 }
@@ -499,6 +256,352 @@ const Piece = forwardRef<HTMLButtonElement, ButtonProps>(({ children, ...rest },
   );
 });
 Piece.displayName = 'Piece';
+
+const Board = () => {
+  const { board, turn, pieceToMove, setPieceToMove, clearPieceToMove, upToDate, attemptAction, moveRoutine } =
+    useGameContext();
+
+  return (
+    <div className="grid grid-cols-3 grid-rows-3 gap-2">
+      {board.map((cell, index) => (
+        <Cell key={index} highlight={upToDate && pieceToMove === index}>
+          {cell !== undefined ? (
+            <Piece
+              onClick={() => {
+                assertPosition(index);
+
+                // check if piece is yours, no action allowed if it's not
+                if (cell !== undefined && cell !== turn) return;
+
+                // only allow selecting if out of generative moves
+                if (shouldMoveBeGenerative(board, turn)) return;
+
+                // if clicked on the same piece, deselect it
+                if (pieceToMove === index) {
+                  attemptAction(() => {
+                    clearPieceToMove();
+                  });
+                  return;
+                }
+
+                // can't select empty cell
+                if (cell === undefined) return;
+                attemptAction(() => {
+                  setPieceToMove(index);
+                });
+                return;
+              }}
+            >
+              {cell}
+            </Piece>
+          ) : (
+            <Empty
+              onClick={() => {
+                assertPosition(index);
+
+                // check if move should be generative
+                if (shouldMoveBeGenerative(board, turn)) {
+                  const move = makeGenerativeMove(turn, index);
+                  attemptAction(() => {
+                    moveRoutine(move);
+                  });
+                  return;
+                }
+
+                // move piece
+                if (pieceToMove !== undefined) {
+                  // explicitly compare against undefined. piece could be 0 which is falsy.
+                  const move = { from: pieceToMove, sign: turn, to: index };
+                  if (!isValidMove(board, move)) return;
+                  attemptAction(() => {
+                    moveRoutine(move);
+                  });
+                }
+              }}
+            />
+          )}
+        </Cell>
+      ))}
+    </div>
+  );
+};
+
+const Game = ({ children }: { children: ReactNode }) => {
+  return <GameContextProvider>{children}</GameContextProvider>;
+};
+
+const History = () => {
+  const { history } = useGameContext();
+
+  return (
+    <Table className="w-fit h-full">
+      <TableBody className="border whitespace-nowrap font-mono">
+        {history.length === 0 ? (
+          <TableRow
+            className="grid grid-cols-3 even:bg-element hover:bg-gray-1 even:hover:bg-element gap-4 p-2"
+            key={'placeholder'}
+          >
+            {/* TODO: chess.com has slots on the sides of moves to signify blunders, good moves, etc. I'm most interested in "this was the winning move", but maybe it's cool to make analysis since tic tac toe is a finite game and analysis would only need low depths. */}
+            <td className="text-end">1.</td>
+            <td className="text-transparent">...</td>
+            <td className="text-transparent">...</td>
+          </TableRow>
+        ) : null}
+
+        {history.map((move, index) => {
+          if (index % 2 === 0) {
+            const player1Move = move;
+            const player2Move = history[index + 1];
+
+            return (
+              <TableRow
+                className="grid grid-cols-3 even:bg-element hover:bg-gray-1 even:hover:bg-element gap-4 p-2"
+                key={index}
+              >
+                <td className="text-end">{Math.ceil(index / 2 + 1)}.</td>
+                <td className="">{encodeMove(player1Move)}</td>
+                <td className="">{player2Move !== undefined ? encodeMove(player2Move) : null}</td>
+              </TableRow>
+            );
+          }
+        })}
+      </TableBody>
+      <TableFooter>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              options={{
+                variant: 'outline',
+              }}
+              className="mr-0 ml-auto block w-full"
+            >
+              Share game state
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="p-0 border-none" align="start" side="top">
+            <div className="flex [&>*:not(:first-child)]:-ml-px">
+              {/* TODO: "url with copy button attached" is a pattern common enough that it warrants a component, especially since displaying the copy state tends to be annoying to do every time */}
+              <Input
+                className="border rounded py-1.5 h-auto "
+                value={`${window.location.origin}?history=${encodeHistory(history)}`}
+                readOnly
+              />
+              <Button
+                className="whitespace-nowrap -ml-px"
+                options={{ variant: 'outline' }}
+                onClick={async () => {
+                  await navigator.clipboard.writeText(`${window.location.origin}?history=${encodeHistory(history)}`);
+                }}
+              >
+                Copy link
+              </Button>
+            </div>
+          </PopoverContent>
+        </Popover>
+      </TableFooter>
+    </Table>
+  );
+};
+
+const HistoryControls = () => {
+  const { history, historyIndex, setHistoryIndex, incrementHistoryIndex, decrementHistoryIndex } = useGameContext();
+
+  return (
+    <div>
+      <Button
+        options={{
+          variant: 'outline',
+        }}
+        onClick={() => {
+          if (history.length < 1) return;
+          setHistoryIndex(1);
+        }}
+      >
+        first
+      </Button>
+      <Button
+        options={{
+          variant: 'outline',
+        }}
+        onClick={decrementHistoryIndex}
+      >
+        prev.
+      </Button>
+      <Button
+        options={{
+          variant: 'outline',
+        }}
+        onClick={incrementHistoryIndex}
+      >
+        next
+      </Button>
+      <Button
+        options={{
+          variant: 'outline',
+        }}
+        onClick={() => {
+          setHistoryIndex(history.length);
+        }}
+      >
+        last
+      </Button>
+    </div>
+  );
+};
+
+const CurrentTurn = () => {
+  const { turn } = useGameContext();
+
+  return <div>Current turn: {turn}</div>;
+};
+
+type NewGameButtonProps = Omit<UiButtonProps, 'onClick'>;
+const NewGameButton = forwardRef<HTMLButtonElement, NewGameButtonProps>(({ ...buttonPassthrough }, ref) => {
+  const { newGame } = useGameContext();
+
+  return <Button ref={ref} onClick={newGame} {...buttonPassthrough} />;
+});
+NewGameButton.displayName = 'NewGameButton';
+
+interface GameContextData {
+  board: Board;
+  setBoard: React.Dispatch<React.SetStateAction<Board>>;
+  turn: 'x' | 'o';
+  setTurn: React.Dispatch<React.SetStateAction<'x' | 'o'>>;
+  nextTurn: 'x' | 'o';
+  passTurn: () => void;
+  pieceToMove: Position | undefined;
+  setPieceToMove: React.Dispatch<React.SetStateAction<Position | undefined>>;
+  clearPieceToMove: () => void;
+  history: MoveHistory;
+  setHistory: React.Dispatch<React.SetStateAction<MoveHistory>>;
+  historyIndex: number;
+  setHistoryIndex: React.Dispatch<React.SetStateAction<number>>;
+  incrementHistoryIndex: () => void;
+  decrementHistoryIndex: () => void;
+  upToDate: boolean;
+  setUpToDate: React.Dispatch<React.SetStateAction<boolean>>;
+  gameLocked: boolean;
+  setGameLocked: React.Dispatch<React.SetStateAction<boolean>>;
+  attemptAction: (action: () => void) => void;
+  moveRoutine: (move: Move) => void;
+  newGame: () => void;
+}
+
+const GameContext = createContext<GameContextData | undefined>(undefined);
+
+const GameContextProvider = ({ children }: { children: ReactNode }) => {
+  const [board, setBoard] = useState<Board>(EMPTY_BOARD);
+  const [turn, setTurn] = useState<'x' | 'o'>('x');
+  const nextTurn = turn === 'x' ? 'o' : 'x';
+  const passTurn = () => setTurn(nextTurn);
+
+  const [pieceToMove, setPieceToMove] = useState<Position | undefined>(undefined);
+  const clearPieceToMove = () => setPieceToMove(undefined);
+
+  // before breaking this into a context, history started as decodedHistory
+  const [history, setHistory] = useState<MoveHistory>([]);
+  const [historyIndex, setHistoryIndex] = useState<number>(history.length);
+  const incrementHistoryIndex = () => {
+    if (historyIndex === history.length) return;
+    setHistoryIndex(historyIndex + 1);
+  };
+  const decrementHistoryIndex = () => {
+    if (historyIndex === 0) return;
+    setHistoryIndex(historyIndex - 1);
+  };
+  const [upToDate, setUpToDate] = useState<boolean>(true);
+  const [gameLocked, setGameLocked] = useState(false);
+
+  const [winner, setWinner] = useState<Sign | false>(false);
+
+  const attemptAction = (action: () => void) => {
+    if (gameLocked) return;
+    action();
+  };
+
+  const moveRoutine = (move: Move) => {
+    console.log('move', encodeMove(move));
+    setHistory([...history, move]);
+    if (upToDate) setHistoryIndex(historyIndex + 1);
+    clearPieceToMove();
+    passTurn();
+  };
+
+  const newGame = () => {
+    setHistoryIndex(0);
+    setHistory([]);
+    setGameLocked(false);
+
+    setTurn('x');
+    clearPieceToMove();
+  };
+
+  useEffect(() => {
+    setWinner(checkWinner(board));
+  }, [board]);
+  useEffect(() => {
+    if (!winner) return;
+
+    setGameLocked(true);
+    console.log('🎉🎉 ', winner, ' wins 🎉🎉');
+  }, [winner]);
+
+  useEffect(() => {
+    setGameLocked(false);
+    if (historyIndex === history.length) return;
+    setGameLocked(true);
+  }, [historyIndex, history]);
+
+  useEffect(() => {
+    setBoard(computeBoardFromHistory(history, historyIndex));
+
+    if (historyIndex === history.length) {
+      setUpToDate(true);
+    }
+
+    if (historyIndex < history.length) {
+      setUpToDate(false);
+    }
+  }, [history, historyIndex]);
+
+  // Value object containing the shared data and functions
+  const contextValue: GameContextData = {
+    board,
+    setBoard,
+    turn,
+    setTurn,
+    nextTurn,
+    passTurn,
+    pieceToMove,
+    setPieceToMove,
+    clearPieceToMove,
+    history,
+    setHistory,
+    historyIndex,
+    setHistoryIndex,
+    incrementHistoryIndex,
+    decrementHistoryIndex,
+    upToDate,
+    setUpToDate,
+    gameLocked,
+    setGameLocked,
+    attemptAction,
+    moveRoutine,
+    newGame,
+  };
+
+  return <GameContext.Provider value={contextValue}>{children}</GameContext.Provider>;
+};
+
+// Custom hook to access the context data
+const useGameContext = (): GameContextData => {
+  const context = useContext(GameContext);
+  if (!context) {
+    throw new Error('useGameContext must be used within a GameContextProvider');
+  }
+  return context;
+};
 
 const DESCRIPTION = `
 tic-tac-two aims to solve draws.
