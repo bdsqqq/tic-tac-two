@@ -5,7 +5,7 @@ import { Button } from '@haxiom/ui/button';
 import { Input } from '@haxiom/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@haxiom/ui/popover';
 import { Table, TableBody, TableRow, TableFooter } from '@haxiom/ui/table';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { createContext, forwardRef, useContext, useEffect, useState } from 'react';
 
@@ -197,14 +197,10 @@ function checkWinner(board: Board): Sign | false {
 }
 
 export default function Home() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const encodedHistory = searchParams.get('history');
-  const decodedHistory = encodedHistory ? decodeHistory(encodedHistory) : [];
-
   return (
     <main className="flex flex-col md:flex-row md:justify-between gap-8">
       <Game>
+        <LoadGameFromURL />
         <div className="shrink-0">
           <Board />
         </div>
@@ -404,7 +400,7 @@ const History = () => {
 };
 
 const HistoryControls = () => {
-  const { history, historyIndex, setHistoryIndex, incrementHistoryIndex, decrementHistoryIndex } = useGameContext();
+  const { history, setHistoryIndex, incrementHistoryIndex, decrementHistoryIndex } = useGameContext();
 
   return (
     <div>
@@ -462,6 +458,23 @@ const NewGameButton = forwardRef<HTMLButtonElement, NewGameButtonProps>(({ ...bu
   return <Button ref={ref} onClick={newGame} {...buttonPassthrough} />;
 });
 NewGameButton.displayName = 'NewGameButton';
+
+// TODO: this feels like a hack, maybe should be a hook conditionally called in GameContextProvider? But conditionally calling hooks feels like a hack too.
+const LoadGameFromURL = () => {
+  const searchParams = useSearchParams();
+  const encodedHistory = searchParams.get('history');
+  const { setHistory, setHistoryIndex } = useGameContext();
+
+  useEffect(() => {
+    const decodedHistory = encodedHistory ? decodeHistory(encodedHistory) : [];
+
+    console.log('setting history,', decodedHistory);
+    setHistory(decodedHistory);
+    setHistoryIndex(decodedHistory.length);
+  }, [encodedHistory, setHistory, setHistoryIndex]);
+
+  return null;
+};
 
 interface GameContextData {
   board: Board;
