@@ -271,16 +271,12 @@ const Cell = ({
   const { isOver, setNodeRef } = useDroppable({
     id: uid,
   });
-  const style = {
-    color: isOver ? 'green' : undefined,
-  };
 
   return (
     <div
       ref={setNodeRef}
-      style={style}
       {...rest}
-      className={cn('bg-gray-3 p-2 rounded w-40 h-40', highlight && 'bg-gray-9')}
+      className={cn('bg-gray-3 p-2 rounded w-40 h-40', highlight && 'bg-gray-9', isOver && 'bg-gray-5')}
     >
       {children}
     </div>
