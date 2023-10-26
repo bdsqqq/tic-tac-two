@@ -9,6 +9,9 @@ import { useSearchParams } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { createContext, forwardRef, useContext, useEffect, useState } from 'react';
 
+import type { DragEndEvent } from '@dnd-kit/core';
+import { DndContext, useDraggable, useDroppable } from '@dnd-kit/core';
+
 export const runtime = 'edge';
 
 const WINNING_COMBINATIONS = [
@@ -198,38 +201,87 @@ function checkWinner(board: Board): Sign | false {
 
 export default function Home() {
   return (
-    <main className="flex flex-col md:flex-row md:justify-between gap-8">
-      <Game>
-        <LoadGameFromURL />
-        <div className="shrink-0">
-          <Board />
-        </div>
-
-        <div className="flex flex-col justify-between shrink">
-          <CurrentTurn />
-          <History />
-          <HistoryControls />
-
-          <div>
-            <p className="w-full">{DESCRIPTION}</p>
-            <NewGameButton className="mr-0 ml-auto block">New game</NewGameButton>
+    <div className="flex flex-col gap-12">
+      <main className="flex flex-col md:flex-row md:justify-between gap-8">
+        <Game>
+          <LoadGameFromURL />
+          <div className="shrink-0">
+            <Board />
           </div>
-        </div>
-      </Game>
-    </main>
+
+          <div className="flex flex-col justify-between shrink">
+            <CurrentTurn />
+            <History />
+            <HistoryControls />
+
+            <div>
+              <p className="w-full">{DESCRIPTION}</p>
+              <NewGameButton className="mr-0 ml-auto block">New game</NewGameButton>
+            </div>
+          </div>
+        </Game>
+      </main>
+      <div>
+        <DNDDemo />
+      </div>
+    </div>
   );
 }
+
+const DNDDemo = () => {
+  function handleDragEnd(event: DragEndEvent) {
+    const { over } = event;
+
+    // If the item is dropped over a container, set it as the parent
+    // otherwise reset the parent to `null`
+    setParent(over ? `${over.id}` : null);
+  }
+
+  const containers = ['A', 'B', 'C'];
+  const [parent, setParent] = useState<string | null>(null);
+  const draggableMarkup = <Piece uid="draggable">x</Piece>;
+
+  return (
+    <DndContext onDragEnd={handleDragEnd}>
+      {parent === null ? draggableMarkup : null}
+
+      <div className="grid grid-cols-2 gap-2 w-fit">
+        {containers.map((id) => (
+          // We updated the Droppable component so it would accept an `id`
+          // prop and pass it to `useDroppable`
+          <Cell key={id} uid={id} highlight={false}>
+            {parent === id ? draggableMarkup : null}
+          </Cell>
+        ))}
+      </div>
+    </DndContext>
+  );
+};
 
 const Cell = ({
   children,
   highlight,
+  uid,
   ...rest
 }: React.HTMLProps<HTMLDivElement> & {
   children: React.ReactNode;
   highlight: boolean;
+  uid: string;
 }) => {
+  const { isOver, setNodeRef } = useDroppable({
+    id: uid,
+  });
+  const style = {
+    color: isOver ? 'green' : undefined,
+  };
+
   return (
-    <div {...rest} className={cn('bg-gray-3 p-2 rounded w-40 h-40', highlight && 'bg-gray-9')}>
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...rest}
+      className={cn('bg-gray-3 p-2 rounded w-40 h-40', highlight && 'bg-gray-9')}
+    >
       {children}
     </div>
   );
@@ -244,9 +296,26 @@ const Empty = forwardRef<HTMLButtonElement, ButtonProps>(({ ...rest }, ref) => {
 });
 Empty.displayName = 'Empty';
 
-const Piece = forwardRef<HTMLButtonElement, ButtonProps>(({ children, ...rest }, ref) => {
+// 👺👺👺 Need to use setNodeRef for dnd-kit but forwardRef should avoid headaches with radix triggers and such, but not sure what to do for now. Not forwarding this ref is giving me a bad feeling
+const Piece = forwardRef<HTMLButtonElement, ButtonProps & { uid: string }>(({ uid, children, ...rest }, ref) => {
+  const { attributes, listeners, setNodeRef, transform } = useDraggable({
+    id: uid,
+  });
+  const style = transform
+    ? {
+        transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+      }
+    : undefined;
+
   return (
-    <button {...rest} className="flex justify-center items-center bg-subtle rounded-md h-full w-full" ref={ref}>
+    <button
+      className="flex justify-center items-center bg-subtle rounded-md h-full w-full touch-none select-none"
+      ref={setNodeRef}
+      style={style}
+      {...listeners}
+      {...attributes}
+      {...rest}
+    >
       <div className="font-bold text-7xl">{children}</div>
     </button>
   );
@@ -260,9 +329,10 @@ const Board = () => {
   return (
     <div className="grid grid-cols-3 grid-rows-3 gap-2">
       {board.map((cell, index) => (
-        <Cell key={index} highlight={upToDate && pieceToMove === index}>
+        <Cell uid={`cell-${index}`} key={index} highlight={upToDate && pieceToMove === index}>
           {cell !== undefined ? (
             <Piece
+              uid={`${cell}-${index}`}
               onClick={() => {
                 assertPosition(index);
 
@@ -323,7 +393,11 @@ const Board = () => {
 };
 
 const Game = ({ children }: { children: ReactNode }) => {
-  return <GameContextProvider>{children}</GameContextProvider>;
+  return (
+    <DndContext>
+      <GameContextProvider>{children}</GameContextProvider>
+    </DndContext>
+  );
 };
 
 const History = () => {
