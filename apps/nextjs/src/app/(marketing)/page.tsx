@@ -9,7 +9,6 @@ import { useSearchParams } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { createContext, forwardRef, useContext, useEffect, useState } from 'react';
 
-import type { DragEndEvent } from '@dnd-kit/core';
 import { DndContext, useDraggable, useDroppable } from '@dnd-kit/core';
 
 export const runtime = 'edge';
@@ -221,42 +220,9 @@ export default function Home() {
           </div>
         </Game>
       </main>
-      <div>
-        <DNDDemo />
-      </div>
     </div>
   );
 }
-
-const DNDDemo = () => {
-  function handleDragEnd(event: DragEndEvent) {
-    const { over } = event;
-
-    // If the item is dropped over a container, set it as the parent
-    // otherwise reset the parent to `null`
-    setParent(over ? `${over.id}` : null);
-  }
-
-  const containers = ['A', 'B', 'C', 'D'];
-  const [parent, setParent] = useState<string | null>(null);
-  const draggableMarkup = <Piece uid="draggable">x</Piece>;
-
-  return (
-    <DndContext onDragEnd={handleDragEnd}>
-      {parent === null ? draggableMarkup : null}
-
-      <div className="grid grid-cols-2 gap-2 w-fit">
-        {containers.map((id) => (
-          // We updated the Droppable component so it would accept an `id`
-          // prop and pass it to `useDroppable`
-          <Cell key={id} uid={id} highlight={false}>
-            {parent === id ? draggableMarkup : null}
-          </Cell>
-        ))}
-      </div>
-    </DndContext>
-  );
-};
 
 const Cell = ({
   children,
@@ -339,19 +305,8 @@ const Board = () => {
   const { board, turn, pieceToMove, setPieceToMove, clearPieceToMove, upToDate, attemptAction, moveRoutine } =
     useGameContext();
 
-  // function handleDragEnd(event: DragEndEvent) {
-  //   const { over } = event;
-
-  //   // If the item is dropped over a container, set it as the parent
-  //   // otherwise reset the parent to `null`
-  //   setParent(over ? `${over.id}` : null);
-  // }
-
   return (
     <DndContext
-      onDragStart={(e) => {
-        console.log('dragStart', e);
-      }}
       onDragEnd={(e) => {
         // 🐉🐉🐉 Brittle, depends on ID having a structure of sign-from.
         // TODO: make id generation & deconstruction into functions
@@ -384,11 +339,13 @@ const Board = () => {
         {board.map((cell, index) => (
           <Cell uid={`cell-${index}`} key={index} highlight={upToDate && pieceToMove === index}>
             {cell !== undefined ? (
-              turn == cell ? (
+              turn === cell ? (
                 <Piece
+                  // TODO: figure out how to add a delay to dragging.
+                  // TODO: figure out how to let onClick happen if user taps but doesn't drag.
                   draggable={turn === cell}
-                  disabled={turn != cell}
-                  aria-disabled={turn != cell}
+                  disabled={turn !== cell}
+                  aria-disabled={turn !== cell}
                   uid={`${cell}-${index}`}
                   onClick={() => {
                     assertPosition(index);
