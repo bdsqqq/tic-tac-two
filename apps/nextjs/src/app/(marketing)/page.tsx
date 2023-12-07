@@ -10,6 +10,7 @@ import type { ReactNode } from 'react';
 import { createContext, forwardRef, useContext, useEffect, useState } from 'react';
 
 import { DndContext, useDraggable, useDroppable } from '@dnd-kit/core';
+import { Dialog, DialogContent, DialogTitle } from '@haxiom/ui/dialog';
 
 export const runtime = 'edge';
 
@@ -203,6 +204,7 @@ export default function Home() {
     <div className="flex flex-col gap-12">
       <main className="flex flex-col md:flex-row md:justify-between gap-8">
         <Game>
+          <WinDialog />
           <LoadGameFromURL />
           <div className="shrink-0">
             <Board />
@@ -416,6 +418,28 @@ const Game = ({ children }: { children: ReactNode }) => {
   return <GameContextProvider>{children}</GameContextProvider>;
 };
 
+const WinDialog = () => {
+  const { winner } = useGameContext();
+
+  return (
+    <Dialog open={!!winner}>
+      <DialogContent closeButton={false} className="flex flex-col justify-between">
+        <DialogTitle className="text-2xl">{winner} wins!</DialogTitle>
+
+        <div className="-mx-6 -mb-6 flex justify-end ">
+          <NewGameButton
+            options={{
+              size: 'lg',
+            }}
+          >
+            New game
+          </NewGameButton>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 const History = () => {
   const { history } = useGameContext();
 
@@ -589,6 +613,7 @@ interface GameContextData {
   attemptAction: (action: () => void) => void;
   moveRoutine: (move: Move) => void;
   newGame: () => void;
+  winner: Sign | false;
 }
 
 const GameContext = createContext<GameContextData | undefined>(undefined);
@@ -692,6 +717,7 @@ const GameContextProvider = ({ children }: { children: ReactNode }) => {
     attemptAction,
     moveRoutine,
     newGame,
+    winner,
   };
 
   return <GameContext.Provider value={contextValue}>{children}</GameContext.Provider>;
