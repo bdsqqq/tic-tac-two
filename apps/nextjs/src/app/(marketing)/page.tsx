@@ -430,14 +430,26 @@ const Game = ({ children }: { children: ReactNode }) => {
 };
 
 const WinDialog = () => {
+  const [open, setOpen] = useState(false);
   const { winner } = useGameContext();
 
+  useEffect(() => {
+    if (!winner) return;
+
+    setOpen(true);
+  }, [winner]);
+
   return (
-    <Dialog open={!!winner}>
-      <DialogContent closeButton={false} className="flex flex-col justify-between">
+    <Dialog
+      open={open}
+      onOpenChange={(open) => {
+        setOpen(open);
+      }}
+    >
+      <DialogContent className="flex flex-col justify-between">
         <DialogTitle className="text-2xl">{winner} wins!</DialogTitle>
 
-        <div className="-mx-6 -mb-6 flex justify-end ">
+        <div className="-mx-6 -mb-6 flex justify-between flex-row-reverse">
           <NewGameButton
             options={{
               size: 'lg',
@@ -445,6 +457,14 @@ const WinDialog = () => {
           >
             New game
           </NewGameButton>
+          <ShareGameStateButton
+            options={{
+              variant: 'outline',
+              size: 'lg',
+            }}
+          >
+            Share Replay
+          </ShareGameStateButton>
         </div>
       </DialogContent>
     </Dialog>
@@ -618,6 +638,24 @@ const ResetScoreButton = forwardRef<HTMLButtonElement, ResetScoreButtonProps>(({
   );
 });
 ResetScoreButton.displayName = 'ResetScoreButton';
+
+type ShareGameStateButtonProps = Omit<UiButtonProps, 'onClick'>;
+const ShareGameStateButton = forwardRef<HTMLButtonElement, ShareGameStateButtonProps>(
+  ({ ...buttonPassthrough }, ref) => {
+    const { history } = useGameContext();
+
+    return (
+      <Button
+        ref={ref}
+        onClick={async () => {
+          await navigator.clipboard.writeText(`${window.location.origin}?history=${encodeHistory(history)}`);
+        }}
+        {...buttonPassthrough}
+      />
+    );
+  }
+);
+ShareGameStateButton.displayName = 'ShareGameStateButton';
 
 // TODO: this feels like a hack, maybe should be a hook conditionally called in GameContextProvider? But conditionally calling hooks feels like a hack too.
 const LoadGameFromURL = () => {
