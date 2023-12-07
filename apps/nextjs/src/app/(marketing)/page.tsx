@@ -211,13 +211,25 @@ export default function Home() {
           </div>
 
           <div className="flex flex-col justify-between shrink">
+            <Score />
             <CurrentTurn />
             <History />
             <HistoryControls />
 
-            <div>
+            <div className="flex flex-col gap-4">
               <p className="w-full">{DESCRIPTION}</p>
-              <NewGameButton className="mr-0 ml-auto block">New game</NewGameButton>
+              <div className="flex justify-between">
+                <ResetScoreButton
+                  options={{
+                    intent: 'destructive',
+                    variant: 'outline',
+                  }}
+                >
+                  Reset Score
+                </ResetScoreButton>
+
+                <NewGameButton>New game</NewGameButton>
+              </div>
             </div>
           </div>
         </Game>
@@ -440,6 +452,17 @@ const WinDialog = () => {
   );
 };
 
+const Score = () => {
+  const { score } = useGameContext();
+
+  return (
+    <div className="flex gap-2">
+      <div>o: {score.o}</div>
+      <div>x: {score.x}</div>
+    </div>
+  );
+};
+
 const History = () => {
   const { history } = useGameContext();
 
@@ -573,6 +596,14 @@ const NewGameButton = forwardRef<HTMLButtonElement, NewGameButtonProps>(({ ...bu
 });
 NewGameButton.displayName = 'NewGameButton';
 
+type ResetScoreButtonProps = Omit<UiButtonProps, 'onClick'>;
+const ResetScoreButton = forwardRef<HTMLButtonElement, ResetScoreButtonProps>(({ ...buttonPassthrough }, ref) => {
+  const { resetScore } = useGameContext();
+
+  return <Button ref={ref} onClick={resetScore} {...buttonPassthrough} />;
+});
+ResetScoreButton.displayName = 'ResetScoreButton';
+
 // TODO: this feels like a hack, maybe should be a hook conditionally called in GameContextProvider? But conditionally calling hooks feels like a hack too.
 const LoadGameFromURL = () => {
   const searchParams = useSearchParams();
@@ -614,7 +645,15 @@ interface GameContextData {
   moveRoutine: (move: Move) => void;
   newGame: () => void;
   winner: Sign | false;
+  score: Score;
+  resetScore: () => void;
 }
+
+type Score = Record<Sign, number>;
+const EMPTY_SCORE = {
+  x: 0,
+  o: 0,
+};
 
 const GameContext = createContext<GameContextData | undefined>(undefined);
 
@@ -643,9 +682,27 @@ const GameContextProvider = ({ children }: { children: ReactNode }) => {
 
   const [winner, setWinner] = useState<Sign | false>(false);
 
+  const [score, setScore] = useState<Score>(EMPTY_SCORE);
+
+  const incrementScore = (prev: Score, target: Sign): Score => {
+    return {
+      ...prev,
+      [target]: prev[target] + 1,
+    };
+  };
+
+  useEffect(() => {
+    if (!winner) return;
+
+    setScore((prev) => incrementScore(prev, winner));
+  }, [winner]);
+
   const attemptAction = (action: () => void) => {
     if (gameLocked) return;
     action();
+  };
+  const resetScore = () => {
+    setScore(EMPTY_SCORE);
   };
 
   const moveRoutine = (move: Move) => {
@@ -718,6 +775,8 @@ const GameContextProvider = ({ children }: { children: ReactNode }) => {
     moveRoutine,
     newGame,
     winner,
+    score,
+    resetScore,
   };
 
   return <GameContext.Provider value={contextValue}>{children}</GameContext.Provider>;
