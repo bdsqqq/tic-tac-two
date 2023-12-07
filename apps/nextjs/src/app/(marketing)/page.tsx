@@ -11,6 +11,7 @@ import { createContext, forwardRef, useContext, useEffect, useState } from 'reac
 
 import { DndContext, useDraggable, useDroppable } from '@dnd-kit/core';
 import { Dialog, DialogContent, DialogTitle } from '@haxiom/ui/dialog';
+import { ConfirmPopover } from '~/app/(marketing)/_components/ConfirmPopover';
 
 export const runtime = 'edge';
 
@@ -221,14 +222,12 @@ export default function Home() {
               <div className="flex justify-between">
                 <ResetScoreButton
                   options={{
-                    intent: 'destructive',
                     variant: 'outline',
                   }}
                 >
                   Reset Score
                 </ResetScoreButton>
-
-                <NewGameButton>New game</NewGameButton>
+                <NewGameButton requireConfirmation>New game</NewGameButton>
               </div>
             </div>
           </div>
@@ -588,19 +587,35 @@ const CurrentTurn = () => {
   return <div>Current turn: {turn}</div>;
 };
 
-type NewGameButtonProps = Omit<UiButtonProps, 'onClick'>;
-const NewGameButton = forwardRef<HTMLButtonElement, NewGameButtonProps>(({ ...buttonPassthrough }, ref) => {
-  const { newGame } = useGameContext();
+type NewGameButtonProps = Omit<UiButtonProps, 'onClick'> & {
+  requireConfirmation?: boolean;
+};
+const NewGameButton = forwardRef<HTMLButtonElement, NewGameButtonProps>(
+  ({ requireConfirmation, ...buttonPassthrough }, ref) => {
+    const { newGame } = useGameContext();
 
-  return <Button ref={ref} onClick={newGame} {...buttonPassthrough} />;
-});
+    if (requireConfirmation)
+      return (
+        <ConfirmPopover feedback={<>Are you sure?</>}>
+          <Button ref={ref} onClick={newGame} {...buttonPassthrough} />
+        </ConfirmPopover>
+      );
+
+    return <Button ref={ref} onClick={newGame} {...buttonPassthrough} />;
+  }
+);
 NewGameButton.displayName = 'NewGameButton';
 
 type ResetScoreButtonProps = Omit<UiButtonProps, 'onClick'>;
 const ResetScoreButton = forwardRef<HTMLButtonElement, ResetScoreButtonProps>(({ ...buttonPassthrough }, ref) => {
   const { resetScore } = useGameContext();
 
-  return <Button ref={ref} onClick={resetScore} {...buttonPassthrough} />;
+  return (
+    // TODO: allow passing aria stuff to cancel and confirm buttons
+    <ConfirmPopover feedback={<>Are you sure?</>}>
+      <Button ref={ref} onClick={resetScore} {...buttonPassthrough} />
+    </ConfirmPopover>
+  );
 });
 ResetScoreButton.displayName = 'ResetScoreButton';
 
@@ -697,12 +712,13 @@ const GameContextProvider = ({ children }: { children: ReactNode }) => {
     setScore((prev) => incrementScore(prev, winner));
   }, [winner]);
 
+  const resetScore = () => {
+    setScore(EMPTY_SCORE);
+  };
+
   const attemptAction = (action: () => void) => {
     if (gameLocked) return;
     action();
-  };
-  const resetScore = () => {
-    setScore(EMPTY_SCORE);
   };
 
   const moveRoutine = (move: Move) => {
