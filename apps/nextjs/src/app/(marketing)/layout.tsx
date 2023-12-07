@@ -1,6 +1,6 @@
 import { Axiom } from '@haxiom/ui/icons';
 import { cn } from '@haxiom/ui';
-import { MAIN_CONTENT_CLASS, MAX_WIDTH_CLASS } from '~/app/(dashboard)/_constants';
+import { MAIN_CONTENT_CLASS, MAX_WIDTH_CLASS } from '~/app/(marketing)/_constants';
 import Link from 'next/link';
 import { Button } from '@haxiom/ui/button';
 
