@@ -237,7 +237,7 @@ const DNDDemo = () => {
     setParent(over ? `${over.id}` : null);
   }
 
-  const containers = ['A', 'B', 'C'];
+  const containers = ['A', 'B', 'C', 'D'];
   const [parent, setParent] = useState<string | null>(null);
   const draggableMarkup = <Piece uid="draggable">x</Piece>;
 
@@ -293,107 +293,170 @@ const Empty = forwardRef<HTMLButtonElement, ButtonProps>(({ ...rest }, ref) => {
 Empty.displayName = 'Empty';
 
 // 👺👺👺 Need to use setNodeRef for dnd-kit but forwardRef should avoid headaches with radix triggers and such, but not sure what to do for now. Not forwarding this ref is giving me a bad feeling
-const Piece = forwardRef<HTMLButtonElement, ButtonProps & { uid: string }>(({ uid, children, ...rest }, ref) => {
-  const { attributes, listeners, setNodeRef, transform } = useDraggable({
-    id: uid,
-  });
-  const style = transform
-    ? {
-        transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-      }
-    : undefined;
+const Piece = forwardRef<HTMLButtonElement, ButtonProps & { uid: string }>(
+  ({ uid, children, disabled, ...rest }, ref) => {
+    const { attributes, listeners, setNodeRef, transform } = useDraggable({
+      id: uid,
+      disabled: disabled,
+    });
+    const style = transform
+      ? {
+          transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+        }
+      : undefined;
 
+    return (
+      <button
+        className="flex justify-center items-center bg-subtle rounded-md h-full w-full touch-none select-none"
+        ref={setNodeRef}
+        style={style}
+        disabled={disabled}
+        {...listeners}
+        {...attributes}
+        {...rest}
+      >
+        <div className="font-bold text-7xl">{children}</div>
+      </button>
+    );
+  }
+);
+Piece.displayName = 'Piece';
+
+const StaticPiece = forwardRef<HTMLButtonElement, ButtonProps>(({ children, ...rest }, ref) => {
   return (
     <button
       className="flex justify-center items-center bg-subtle rounded-md h-full w-full touch-none select-none"
-      ref={setNodeRef}
-      style={style}
-      {...listeners}
-      {...attributes}
+      ref={ref}
       {...rest}
     >
       <div className="font-bold text-7xl">{children}</div>
     </button>
   );
 });
-Piece.displayName = 'Piece';
+StaticPiece.displayName = 'NonDraggablePiece';
 
 const Board = () => {
   const { board, turn, pieceToMove, setPieceToMove, clearPieceToMove, upToDate, attemptAction, moveRoutine } =
     useGameContext();
 
+  // function handleDragEnd(event: DragEndEvent) {
+  //   const { over } = event;
+
+  //   // If the item is dropped over a container, set it as the parent
+  //   // otherwise reset the parent to `null`
+  //   setParent(over ? `${over.id}` : null);
+  // }
+
   return (
-    <div className="grid grid-cols-3 grid-rows-3 gap-2">
-      {board.map((cell, index) => (
-        <Cell uid={`cell-${index}`} key={index} highlight={upToDate && pieceToMove === index}>
-          {cell !== undefined ? (
-            <Piece
-              uid={`${cell}-${index}`}
-              onClick={() => {
-                assertPosition(index);
+    <DndContext
+      onDragStart={(e) => {
+        console.log('dragStart', e);
+      }}
+      onDragEnd={(e) => {
+        // 🐉🐉🐉 Brittle, depends on ID having a structure of sign-from.
+        // TODO: make id generation & deconstruction into functions
+        const sign = e.active.id.toString().split('')[0];
+        const from = e.active.id.toString().split('')[2];
+        const to = e.over?.id.toString().split('').at(-1);
 
-                // check if piece is yours, no action allowed if it's not
-                if (cell !== undefined && cell !== turn) return;
+        // Check if currentTurn matches sign
+        if (sign !== turn) return;
 
-                // only allow selecting if out of generative moves
-                if (shouldMoveBeGenerative(board, turn)) return;
+        if (!sign || !from || !to) return;
 
-                // if clicked on the same piece, deselect it
-                if (pieceToMove === index) {
-                  attemptAction(() => {
-                    clearPieceToMove();
-                  });
-                  return;
-                }
+        const intFrom = parseInt(from);
+        const intTo = parseInt(to);
 
-                // can't select empty cell
-                if (cell === undefined) return;
-                attemptAction(() => {
-                  setPieceToMove(index);
-                });
-                return;
-              }}
-            >
-              {cell}
-            </Piece>
-          ) : (
-            <Empty
-              onClick={() => {
-                assertPosition(index);
+        assertPositionOr(intFrom);
+        assertPosition(intTo);
 
-                // check if move should be generative
-                if (shouldMoveBeGenerative(board, turn)) {
-                  const move = makeGenerativeMove(turn, index);
-                  attemptAction(() => {
-                    moveRoutine(move);
-                  });
-                  return;
-                }
+        const move = { from: intFrom, sign: sign, to: intTo };
 
-                // move piece
-                if (pieceToMove !== undefined) {
-                  // explicitly compare against undefined. piece could be 0 which is falsy.
-                  const move = { from: pieceToMove, sign: turn, to: index };
-                  if (!isValidMove(board, move)) return;
-                  attemptAction(() => {
-                    moveRoutine(move);
-                  });
-                }
-              }}
-            />
-          )}
-        </Cell>
-      ))}
-    </div>
+        if (!isValidMove(board, move)) return;
+
+        attemptAction(() => {
+          moveRoutine(move);
+        });
+        console.log('dragEnd', e);
+      }}
+    >
+      <div className="grid grid-cols-3 grid-rows-3 gap-2">
+        {board.map((cell, index) => (
+          <Cell uid={`cell-${index}`} key={index} highlight={upToDate && pieceToMove === index}>
+            {cell !== undefined ? (
+              turn == cell ? (
+                <Piece
+                  draggable={turn === cell}
+                  disabled={turn != cell}
+                  aria-disabled={turn != cell}
+                  uid={`${cell}-${index}`}
+                  onClick={() => {
+                    assertPosition(index);
+
+                    // check if piece is yours, no action allowed if it's not
+                    if (cell !== undefined && cell !== turn) return;
+
+                    // only allow selecting if out of generative moves
+                    if (shouldMoveBeGenerative(board, turn)) return;
+
+                    // if clicked on the same piece, deselect it
+                    if (pieceToMove === index) {
+                      attemptAction(() => {
+                        clearPieceToMove();
+                      });
+                      return;
+                    }
+
+                    // can't select empty cell
+                    if (cell === undefined) return;
+                    attemptAction(() => {
+                      setPieceToMove(index);
+                    });
+                    return;
+                  }}
+                >
+                  {cell}
+                </Piece>
+              ) : (
+                <StaticPiece disabled={turn != cell} aria-disabled={turn != cell}>
+                  {cell}
+                </StaticPiece>
+              )
+            ) : (
+              <Empty
+                onClick={() => {
+                  assertPosition(index);
+
+                  // check if move should be generative
+                  if (shouldMoveBeGenerative(board, turn)) {
+                    const move = makeGenerativeMove(turn, index);
+                    attemptAction(() => {
+                      moveRoutine(move);
+                    });
+                    return;
+                  }
+
+                  // move piece
+                  if (pieceToMove !== undefined) {
+                    // explicitly compare against undefined. piece could be 0 which is falsy.
+                    const move = { from: pieceToMove, sign: turn, to: index };
+                    if (!isValidMove(board, move)) return;
+                    attemptAction(() => {
+                      moveRoutine(move);
+                    });
+                  }
+                }}
+              />
+            )}
+          </Cell>
+        ))}
+      </div>
+    </DndContext>
   );
 };
 
 const Game = ({ children }: { children: ReactNode }) => {
-  return (
-    <DndContext>
-      <GameContextProvider>{children}</GameContextProvider>
-    </DndContext>
-  );
+  return <GameContextProvider>{children}</GameContextProvider>;
 };
 
 const History = () => {
