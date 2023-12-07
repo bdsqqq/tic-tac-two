@@ -10,6 +10,7 @@ import { omit, pick } from './utils/fn';
 
 const Popover = PopoverPrimitive.Root;
 const PopoverTrigger = PopoverPrimitive.Trigger;
+const PopoverClose = PopoverPrimitive.Close;
 
 const popoverContentVariants = cva(
   'z-50 min-w-[8rem] border bg-subtle text shadow-md animate-in data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 focus:ring-offset-0',
@@ -101,4 +102,12 @@ const PopoverContent2 = React.forwardRef<React.ElementRef<typeof PopoverPrimitiv
 );
 PopoverContent2.displayName = PopoverPrimitive.Content.displayName;
 
-export { Popover, PopoverTrigger, PopoverContent, PopoverContent2, popoverContentVariants, popoverContentVariants2 };
+export {
+  Popover,
+  PopoverTrigger,
+  PopoverClose,
+  PopoverContent,
+  PopoverContent2,
+  popoverContentVariants,
+  popoverContentVariants2,
+};
