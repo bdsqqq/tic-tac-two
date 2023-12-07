@@ -206,7 +206,7 @@ export default function Home() {
         <Game>
           <WinDialog />
           <LoadGameFromURL />
-          <div className="shrink-0">
+          <div className="shrink-0 w-fit mx-auto">
             <Board />
           </div>
 
@@ -337,7 +337,7 @@ const Board = () => {
         console.log('dragEnd', e);
       }}
     >
-      <div className="grid grid-cols-3 grid-rows-3 gap-2">
+      <div className="grid grid-cols-3 grid-rows-3 w-fit gap-2">
         {board.map((cell, index) => (
           <Cell uid={`cell-${index}`} key={index} highlight={upToDate && pieceToMove === index}>
             {cell !== undefined ? (
