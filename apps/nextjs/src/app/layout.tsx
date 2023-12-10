@@ -10,6 +10,7 @@ import { Toaster } from '@haxiom/ui/toaster';
 import { TailwindIndicator } from '~/components/tailwind-indicator';
 import { ThemeProvider } from '~/components/theme-provider';
 import { siteConfig } from './config';
+import { TooltipProvider } from '@haxiom/ui/tooltip';
 
 const fontSans = IBM_Plex_Sans({
   subsets: ['latin'],
@@ -49,8 +50,10 @@ export default function RootLayout(props: { children: React.ReactNode }) {
     <html lang="en" suppressHydrationWarning className="bg">
       <body className={cn('min-h-screen font-sans antialiased', fontSans.variable, fontMono.variable)}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          {props.children}
-          <TailwindIndicator />
+          <TooltipProvider>
+            {props.children}
+            <TailwindIndicator />
+          </TooltipProvider>
         </ThemeProvider>
         {/* <Analytics /> */}
         <Toaster />
