@@ -1,17 +1,17 @@
 'use client';
+import { DndContext, useDraggable, useDroppable } from '@dnd-kit/core';
 import { cn } from '@haxiom/ui';
 import type { ButtonProps as UiButtonProps } from '@haxiom/ui/button';
 import { Button } from '@haxiom/ui/button';
+import { Dialog, DialogContent, DialogTitle } from '@haxiom/ui/dialog';
 import { Input } from '@haxiom/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@haxiom/ui/popover';
 import { Table, TableBody, TableRow, TableFooter } from '@haxiom/ui/table';
+import { useComposedRefs } from '@radix-ui/react-compose-refs';
+import { ConfirmPopover } from '~/app/(marketing)/_components/ConfirmPopover';
 import { useSearchParams } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { createContext, forwardRef, useContext, useEffect, useState } from 'react';
-
-import { DndContext, useDraggable, useDroppable } from '@dnd-kit/core';
-import { Dialog, DialogContent, DialogTitle } from '@haxiom/ui/dialog';
-import { ConfirmPopover } from '~/app/(marketing)/_components/ConfirmPopover';
 
 export const runtime = 'edge';
 
@@ -271,7 +271,6 @@ const Empty = forwardRef<HTMLButtonElement, ButtonProps>(({ ...rest }, ref) => {
 });
 Empty.displayName = 'Empty';
 
-// 👺👺👺 Need to use setNodeRef for dnd-kit but forwardRef should avoid headaches with radix triggers and such, but not sure what to do for now. Not forwarding this ref is giving me a bad feeling
 const Piece = forwardRef<HTMLButtonElement, ButtonProps & { uid: string }>(
   ({ uid, children, disabled, ...rest }, ref) => {
     const { attributes, listeners, setNodeRef, transform } = useDraggable({
@@ -284,10 +283,15 @@ const Piece = forwardRef<HTMLButtonElement, ButtonProps & { uid: string }>(
         }
       : undefined;
 
+    const composedRefs = useComposedRefs(
+      setNodeRef as (element: HTMLButtonElement) => void, // can't figure out how to make draggable be a HTMLButtonElement instead of an HTMLElement so casting it
+      ref
+    );
+
     return (
       <button
         className="flex justify-center items-center bg-subtle rounded-md h-full w-full touch-none select-none"
-        ref={setNodeRef}
+        ref={composedRefs}
         style={style}
         disabled={disabled}
         {...listeners}
