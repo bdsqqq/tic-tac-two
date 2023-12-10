@@ -434,10 +434,11 @@ const WinDialog = () => {
   const { winner } = useGameContext();
 
   useEffect(() => {
+    if (!winner && open) setOpen(false);
     if (!winner) return;
 
     setOpen(true);
-  }, [winner]);
+  }, [winner, open]);
 
   return (
     <Dialog
