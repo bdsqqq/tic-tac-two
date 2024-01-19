@@ -2,7 +2,6 @@ import 'react-image-crop/dist/ReactCrop.css';
 import '~/styles/globals.css';
 
 import { IBM_Plex_Sans, IBM_Plex_Mono } from 'next/font/google';
-// import { Analytics } from '@vercel/analytics/react';
 
 import { cn } from '@haxiom/ui';
 import { Toaster } from '@haxiom/ui/toaster';
