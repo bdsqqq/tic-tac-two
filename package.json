@@ -14,7 +14,8 @@
     "format": "prettier --write \"**/*.{js,cjs,mjs,ts,tsx,md,json}\" --ignore-path .gitignore",
     "lint": "turbo lint && manypkg check",
     "lint:fix": "turbo lint:fix && manypkg fix",
-    "type-check": "turbo type-check"
+    "type-check": "turbo type-check",
+    "test": "vitest"
   },
   "dependencies": {
     "@ianvs/prettier-plugin-sort-imports": "^4.0.2",
@@ -24,5 +25,8 @@
     "prettier-plugin-tailwindcss": "^0.3.0",
     "turbo": "^1.10.7",
     "typescript": "^5.1.6"
+  },
+  "devDependencies": {
+    "vitest": "^1.2.1"
   }
 }
