@@ -47,7 +47,7 @@ export const metadata = {
 export default function RootLayout(props: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning className="bg">
-      <body className={cn('min-h-screen font-sans antialiased', fontSans.variable, fontMono.variable)}>
+      <body className={cn('min-h-screen font-mono antialiased', fontSans.variable, fontMono.variable)}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <TooltipProvider>
             {props.children}
