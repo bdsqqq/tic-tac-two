@@ -3,8 +3,8 @@
 import { useSearchParams } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { createContext, useContext, useEffect, useState } from 'react';
-import { EMPTY_BOARD, encodeMove, checkWinner, computeBoardFromHistory, decodeHistory } from '~/lib/game-logic';
-import type { Board, Move, MoveHistory, Position, Sign } from '~/lib/game-logic';
+import { EMPTY_BOARD, encodeMove, checkWinner, computeBoardFromHistory, decodeHistory } from '@haxiom/game-logic';
+import type { Board, Move, MoveHistory, Position, Sign } from '@haxiom/game-logic';
 
 export interface GameContextData {
   board: Board;

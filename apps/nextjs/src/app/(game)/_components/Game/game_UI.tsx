@@ -11,7 +11,7 @@ import {
   isValidMove,
   makeGenerativeMove,
   shouldMoveBeGenerative,
-} from '~/lib/game-logic';
+} from '@haxiom/game-logic';
 import { GameContextProvider, useGameContext } from '~/app/(game)/_components/Game/game_state';
 
 export const Cell = ({

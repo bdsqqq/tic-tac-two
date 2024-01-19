@@ -8,7 +8,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@haxiom/ui/popover';
 import { Table, TableBody, TableFooter, TableRow } from '@haxiom/ui/table';
 import { forwardRef, useEffect, useState } from 'react';
 import { ConfirmPopover } from '~/app/(game)/_components/ConfirmPopover';
-import { encodeHistory, encodeMove } from '~/lib/game-logic';
+import { encodeHistory, encodeMove } from '@haxiom/game-logic';
 import { useGameContext } from '~/app/(game)/_components/Game/game_state';
 
 export const WinDialog = () => {

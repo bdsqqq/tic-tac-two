@@ -3,3 +3,4 @@ packages:
   - packages/api
   - packages/config/*
   - packages/ui
+  - packages/game-logic
