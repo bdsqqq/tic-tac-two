@@ -1,4 +1,4 @@
-import { Board, Game } from '~/app/(marketing)/_components/Game/game_UI';
+import { Board, Game } from '~/app/(game)/_components/Game/game_UI';
 import {
   CurrentTurn,
   History,
@@ -7,8 +7,8 @@ import {
   ResetScoreButton,
   Score,
   WinDialog,
-} from '~/app/(marketing)/_components/Game/game_shell_UI';
-import { LoadGameFromURL } from '~/app/(marketing)/_components/Game/game_state';
+} from '~/app/(game)/_components/Game/game_shell_UI';
+import { LoadGameFromURL } from '~/app/(game)/_components/Game/game_state';
 
 export const runtime = 'edge';
 

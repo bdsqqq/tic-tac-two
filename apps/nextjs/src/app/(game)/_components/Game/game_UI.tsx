@@ -12,7 +12,7 @@ import {
   makeGenerativeMove,
   shouldMoveBeGenerative,
 } from '~/lib/game-logic';
-import { GameContextProvider, useGameContext } from '~/app/(marketing)/_components/Game/game_state';
+import { GameContextProvider, useGameContext } from '~/app/(game)/_components/Game/game_state';
 
 export const Cell = ({
   children,
