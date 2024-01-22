@@ -98,6 +98,10 @@ StaticPiece.displayName = 'NonDraggablePiece';
 export const Board = () => {
   const { board, turn, pieceToMove, setPieceToMove, clearPieceToMove, upToDate, attemptAction, moveRoutine } =
     useGameContext();
+  // TODO: BOARD SHOULD GET ALL OF THESE AS PROPS, NOT FROM CONTEXT.
+  // So if we can hook it up with context, we can,
+  // but also could hook it up with ANY OTHER STATE MANAGEMENT
+  // eg: Server managed state, or local with zustand/context etc.
 
   return (
     <DndContext
