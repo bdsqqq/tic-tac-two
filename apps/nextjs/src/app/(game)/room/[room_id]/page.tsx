@@ -13,7 +13,7 @@ import {
 } from '~/app/(game)/_components/Game/game_shell_UI';
 import { LoadGameFromURL } from '~/app/(game)/_components/Game/game_state';
 
-export const runtime = 'edge';
+// export const runtime = 'edge';
 
 export default function Home({ params }: { params: { room_id: string } }) {
   const ws = usePartySocket({
@@ -33,7 +33,7 @@ export default function Home({ params }: { params: { room_id: string } }) {
       console.log('closed');
     },
     onError(e) {
-      console.log('error');
+      console.log('error', e);
     },
   });
 
@@ -43,7 +43,7 @@ export default function Home({ params }: { params: { room_id: string } }) {
         Room: {params.room_id} - {ws.id}
       </h1>
       <main className="flex flex-col md:flex-row md:justify-between gap-8">
-        <Game>
+        {/* <Game> b
           <WinDialog />
           <LoadGameFromURL />
           <div className="shrink-0 w-fit mx-auto">
@@ -70,7 +70,7 @@ export default function Home({ params }: { params: { room_id: string } }) {
               </div>
             </div>
           </div>
-        </Game>
+        </Game> */}
       </main>
     </div>
   );

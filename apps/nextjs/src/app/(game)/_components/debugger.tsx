@@ -5,7 +5,7 @@ import { Pin, Settings } from '@haxiom/ui/icons';
 import { Toggle } from '@haxiom/ui/toggle';
 import { Popover, PopoverContent, PopoverTrigger } from '@haxiom/ui/popover';
 
-import { create } from 'zustand';
+// import { create } from 'zustand';
 import React, { useState } from 'react';
 
 interface DebugState {
@@ -13,10 +13,10 @@ interface DebugState {
   toggle: () => void;
 }
 
-export const useDebugStore = create<DebugState>((set) => ({
-  hasABunchOfAccesses: true,
-  toggle: () => set((state) => ({ hasABunchOfAccesses: !state.hasABunchOfAccesses })),
-}));
+// export const useDebugStore = create<DebugState>((set) => ({
+//   hasABunchOfAccesses: true,
+//   toggle: () => set((state) => ({ hasABunchOfAccesses: !state.hasABunchOfAccesses })),
+// }));
 
 export function Debugger() {
   const [keepOpen, setKeepOpen] = useState(false);
@@ -55,19 +55,19 @@ export function Debugger() {
         >
           <Pin className="h-4 w-4" />
         </Toggle>
-        <ABunchOfAccessesToggler />
+        {/* <ABunchOfAccessesToggler /> */}
       </PopoverContent>
     </Popover>
   );
 }
 
-const ABunchOfAccessesToggler = () => {
-  const { hasABunchOfAccesses, toggle } = useDebugStore();
+// const ABunchOfAccessesToggler = () => {
+//   const { hasABunchOfAccesses, toggle } = useDebugStore();
 
-  return (
-    <div className="flex gap-2 items-center pointer-events-auto">
-      <Checkbox checked={hasABunchOfAccesses} onClick={toggle} className="pointer-events-auto" />
-      Has a bunch of accesses
-    </div>
-  );
-};
+//   return (
+//     <div className="flex gap-2 items-center pointer-events-auto">
+//       <Checkbox checked={hasABunchOfAccesses} onClick={toggle} className="pointer-events-auto" />
+//       Has a bunch of accesses
+//     </div>
+//   );
+// };
