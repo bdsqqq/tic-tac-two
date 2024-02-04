@@ -3,8 +3,8 @@
 import { useSearchParams } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { createContext, useContext, useEffect, useState } from 'react';
-import { EMPTY_BOARD, encodeMove, checkWinner, computeBoardFromHistory, decodeHistory } from '@haxiom/game-logic';
-import type { Board, Move, MoveHistory, Position, Sign } from '@haxiom/game-logic';
+import { EMPTY_BOARD, encodeMove, checkWinner, computeBoardFromHistory, decodeHistory } from '@haxiom/game-logic/core';
+import type { Board, Move, MoveHistory, Position, Sign } from '@haxiom/game-logic/core';
 
 export interface GameContextData {
   board: Board;
@@ -13,9 +13,12 @@ export interface GameContextData {
   setTurn: React.Dispatch<React.SetStateAction<'x' | 'o'>>;
   nextTurn: 'x' | 'o';
   passTurn: () => void;
+
+  // Should probably be handled elsewhere. This is a UI concern.
   pieceToMove: Position | undefined;
   setPieceToMove: React.Dispatch<React.SetStateAction<Position | undefined>>;
   clearPieceToMove: () => void;
+
   history: MoveHistory;
   setHistory: React.Dispatch<React.SetStateAction<MoveHistory>>;
   historyIndex: number;

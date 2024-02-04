@@ -1,3 +1,5 @@
+'use client';
+
 import { Board, Game } from '~/app/(game)/_components/Game/game_UI';
 import {
   CurrentTurn,
@@ -16,34 +18,45 @@ export default function Home() {
   return (
     <div className="flex flex-col gap-12">
       <main className="flex flex-col md:flex-row md:justify-between gap-8">
-        <Game>
-          <WinDialog />
-          <LoadGameFromURL />
-          <div className="shrink-0 w-fit mx-auto">
-            <Board />
-          </div>
+        {/* <Game> */}
+        {/* <WinDialog />
+        <LoadGameFromURL />
+        <div className="shrink-0 w-fit mx-auto">
+          <Board />
+        </div>
 
-          <div className="flex flex-col justify-between shrink">
-            <Score />
-            <CurrentTurn />
-            <History />
-            <HistoryControls />
+        <div className="flex flex-col justify-between shrink">
+          <Score />
+          <CurrentTurn />
+          <History />
+          <HistoryControls />
 
-            <div className="flex flex-col gap-4">
-              <p className="w-full">{DESCRIPTION}</p>
-              <div className="flex justify-between">
-                <ResetScoreButton
-                  options={{
-                    variant: 'outline',
-                  }}
-                >
-                  Reset Score
-                </ResetScoreButton>
-                <NewGameButton requireConfirmation>New game</NewGameButton>
-              </div>
+          <div className="flex flex-col gap-4">
+            <p className="w-full">{DESCRIPTION}</p>
+            <div className="flex justify-between">
+              <ResetScoreButton
+                options={{
+                  variant: 'outline',
+                }}
+              >
+                Reset Score
+              </ResetScoreButton>
+              <NewGameButton requireConfirmation>New game</NewGameButton>
             </div>
           </div>
-        </Game>
+        </div> */}
+
+        {/* <div>{JSON.stringify(game.board)}</div>
+        <div>{game.turn}</div>
+        <button
+          onClick={() => {
+            game.moveRoutine({ from: 0, sign: game.nextTurn, to: 1 });
+          }}
+        >
+          hej
+        </button> */}
+
+        {/* </Game> */}
       </main>
     </div>
   );
