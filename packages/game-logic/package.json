@@ -10,7 +10,9 @@
     "lint:fix": "pnpm lint --fix",
     "type-check": "tsc --noEmit"
   },
-  "dependencies": {},
+  "dependencies": {
+    "immer": "^10.0.3"
+  },
   "devDependencies": {
     "@haxiom/eslint-config": "0.2.0",
     "@types/node": "^20.2.5",
