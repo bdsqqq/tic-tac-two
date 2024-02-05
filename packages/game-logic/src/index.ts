@@ -38,7 +38,7 @@ export class Game {
    * some action has been triggered by
    * a consumer.
    */
-  private exposeState() {
+  exposeState() {
     return {
       board: this.board,
       winner: this.winner,
